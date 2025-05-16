@@ -1,6 +1,9 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # nov-web-crawler
 =======
+=======
+>>>>>>> fb4afc30bcf76b5f631e286d3941ba9da558bf9d
 # README
 
 This README would normally document whatever steps are necessary to get the
@@ -25,4 +28,7 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+<<<<<<< HEAD
 >>>>>>> fb4afc3 (Instance creation - Cleanslate)
+=======
+>>>>>>> fb4afc30bcf76b5f631e286d3941ba9da558bf9d
