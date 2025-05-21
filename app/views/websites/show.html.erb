@@ -1,10 +1,14 @@
-<p style="color: green"><%= notice %></p>
+# <p style="color: green"><%= notice %></p>
 
-<%= render @website %>
+# <%= render @website %>
 
-<div>
-  <%= link_to "Edit this website", edit_website_path(@website) %> |
-  <%= link_to "Back to websites", websites_path %>
+# <div>
+#   <%= link_to "Edit this website", edit_website_path(@website) %> |
+#   <%= link_to "Back to websites", websites_path %>
 
-  <%= button_to "Destroy this website", @website, method: :delete %>
-</div>
+#   <%= button_to "Destroy this website", @website, method: :delete %>
+# </div>
+<h1><%= @website.name %></h1>
+
+<%= link_to "Back to websites", websites_path %>
+<%= link_to "Edit this website", edit_website_path(@website) %>

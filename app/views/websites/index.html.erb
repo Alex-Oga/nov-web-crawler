@@ -1,16 +1,27 @@
-<p style="color: green"><%= notice %></p>
+# <p style="color: green"><%= notice %></p>
 
-<% content_for :title, "Websites" %>
+# <% content_for :title, "Websites" %>
 
+# <h1>Websites</h1>
+
+# <div id="websites">
+#   <% @websites.each do |website| %>
+#     <%= render website %>
+#     <p>
+#       <%= link_to "Show this website", website %>
+#     </p>
+#   <% end %>
+# </div>
+
+# <%= link_to "New website", new_website_path %>
 <h1>Websites</h1>
+
+<%= link_to "New Website", new_website_path %>
 
 <div id="websites">
   <% @websites.each do |website| %>
-    <%= render website %>
-    <p>
-      <%= link_to "Show this website", website %>
-    </p>
+    <div>
+      <%= link_to website.name, website %>
+    </div>
   <% end %>
 </div>
-
-<%= link_to "New website", new_website_path %>
