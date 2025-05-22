@@ -1,11 +1,12 @@
 class WebsitesController < ApplicationController
+    allow_unauthenticated_access only: %i[ index show ]
+    before_action :set_website, only: %i[show edit update]
     
     def index
         @websites = Website.all
     end
 
     def show
-        @website = Website.find(params[:id])
     end
 
     def new
@@ -22,17 +23,22 @@ class WebsitesController < ApplicationController
     end
 
     def edit
-        @website = Website.find(params[:id])
     end
 
     def update
-        @website = Website.find(params[:id])
         if @website.update(website_params)
             redirect_to @website, notice: 'Website was successfully updated.'
         else
             render :edit, status: :unprocessable_entity
+        end
+    end
 
     private
+    def set_website
+        @website = Website.find(params[:id])
+    end
+
+
     def website_params
         params.expect(website: [:name, :url])
     end

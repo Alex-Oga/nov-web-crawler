@@ -8,7 +8,13 @@
 
 #   <%= button_to "Destroy this website", @website, method: :delete %>
 # </div>
-<h1><%= @website.name %></h1>
 
-<%= link_to "Back to websites", websites_path %>
-<%= link_to "Edit this website", edit_website_path(@website) %>
+<% cache @website do %>
+    <h1><%= @website.name %></h1>
+<% end %>
+
+<%= link_to "Back", websites_path %>
+<% if authenticated? %>
+    <%= link_to "Edit", edit_website_path(@website) %>
+    <%= button_to "Delete", @website, method: :delete, data: { turbo_confirm: "Are you sure?" } %>
+<% end %>
