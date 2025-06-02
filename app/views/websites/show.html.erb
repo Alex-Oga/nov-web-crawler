@@ -11,6 +11,7 @@
 
 <% cache @website do %>
     <h1><%= @website.name %></h1>
+    <%= @website.description %>
 <% end %>
 
 <%= link_to "Back", websites_path %>
