@@ -40,6 +40,7 @@ class WebsitesController < ApplicationController
 
 
     def website_params
-        params.expect(website: [ :name, :description ])
+        params.expect(product: [ :name, :description, :featured_image, :novel_amount ])
     end
+
 end

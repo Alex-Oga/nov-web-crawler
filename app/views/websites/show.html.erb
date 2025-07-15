@@ -9,6 +9,8 @@
 #   <%= button_to "Destroy this website", @website, method: :delete %>
 # </div>
 
+<%= image_tag @website.featured_image if @website.featured_image.attached? %>
+
 <% cache @website do %>
     <h1><%= @website.name %></h1>
     <%= @website.description %>

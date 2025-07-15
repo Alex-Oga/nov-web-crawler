@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
-  resources :websites
+  resources :websites do
+    resources :novels, only: [ :create ]
+  end
   root "websites#index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
