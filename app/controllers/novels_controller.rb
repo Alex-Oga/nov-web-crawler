@@ -3,8 +3,8 @@ class NovelsController < ApplicationController
     before_action :set_novel
     
     def create
-        @product.novels.where(novel_params).first_or_create
-        redirect_to @product, notice: "New Novel Registered."
+        @website.novels.where(novel_params).first_or_create
+        redirect_to @website, notice: "New Novel Registered."
     end
 
     private
