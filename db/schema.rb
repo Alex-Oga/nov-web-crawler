@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_23_154957) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_27_134401) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -64,7 +64,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_23_154957) do
     t.string "link"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "chapters"
     t.string "name"
     t.index ["website_id"], name: "index_novels_on_website_id"
   end
@@ -89,7 +88,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_23_154957) do
   create_table "websites", force: :cascade do |t|
     t.string "name"
     t.string "link"
-    t.integer "novels"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
