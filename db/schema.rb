@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_15_130847) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_23_154957) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -49,12 +49,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_15_130847) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "chapters", force: :cascade do |t|
+    t.integer "novel_id", null: false
+    t.string "name"
+    t.string "link"
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["novel_id"], name: "index_chapters_on_novel_id"
+  end
+
   create_table "novels", force: :cascade do |t|
     t.integer "website_id", null: false
     t.string "link"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "chapters"
+    t.string "name"
     t.index ["website_id"], name: "index_novels_on_website_id"
   end
 
@@ -78,13 +89,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_15_130847) do
   create_table "websites", force: :cascade do |t|
     t.string "name"
     t.string "link"
-    t.integer "novel_amount"
+    t.integer "novels"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "chapters", "novels"
   add_foreign_key "novels", "websites"
   add_foreign_key "sessions", "users"
 end

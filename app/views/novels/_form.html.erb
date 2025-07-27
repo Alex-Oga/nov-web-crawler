@@ -1,0 +1,17 @@
+<%= form_with(model: novel) do |form| %>
+  <% if novel.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(novel.errors.count, "error") %> prohibited this novel from being saved:</h2>
+
+      <ul>
+        <% novel.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

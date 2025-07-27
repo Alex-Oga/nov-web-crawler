@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :chapters
+  resources :novels
   resource :session
   resources :passwords, param: :token
   resources :websites do

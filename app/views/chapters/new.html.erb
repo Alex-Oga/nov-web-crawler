@@ -1,0 +1,11 @@
+<% content_for :title, "New chapter" %>
+
+<h1>New chapter</h1>
+
+<%= render "form", chapter: @chapter %>
+
+<br>
+
+<div>
+  <%= link_to "Back to chapters", chapters_path %>
+</div>

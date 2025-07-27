@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @novel %>
+
+<div>
+  <%= link_to "Edit this novel", edit_novel_path(@novel) %> |
+  <%= link_to "Back to novels", novels_path %>
+
+  <%= button_to "Destroy this novel", @novel, method: :delete %>
+</div>
