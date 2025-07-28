@@ -1,10 +1,11 @@
 Rails.application.routes.draw do
-  resources :chapters
-  resources :novels
   resource :session
   resources :passwords, param: :token
   resources :websites do
-    resources :novels, only: [ :create ]
+    resources :novels, shallow: true
+  end
+  resources :novels do
+    resources :chapters, shallow: true
   end
   root "websites#index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
