@@ -6,11 +6,10 @@
 
 <div id="novels">
   <% @novels.each do |novel| %>
-    <%= render novel %>
-    <p>
-      <%= link_to "Show this novel", novel %>
-    </p>
+    <div>
+      <%= link_to novel.name, novel %>
+    </div>
   <% end %>
 </div>
-
+    
 <%= link_to "New novel", new_novel_path %>

@@ -1,19 +1,33 @@
 class NovelsController < ApplicationController
     allow_unauthenticated_access
     before_action :set_novel
+
+    def new
+        @novel = Novel.new
+    end
     
+    def index
+        @novels = Novel.all
+    end 
+
+    def show
+    end
+
     def create
-        @website.novels.where(novel_params).first_or_create
-        redirect_to @website, notice: "New Novel Registered."
+        @novel = Novel.new(novel_params)
+        if @novel.save
+            redirect_to @website, notice: "New Novel Registered."
+        else
+        render :new, status: :unprocessable_entity
+        end
     end
 
     private
 
     def set_novel
-        @novel = Website.find(params[:website_id])
     end
 
     def novel_params
-        params.expect(novel: [ :link ])
+        params.expect(novel: [ :name, :link ])
     end
 end
