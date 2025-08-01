@@ -18,7 +18,7 @@ class NovelsController < ApplicationController
         if @novel.save
             redirect_to @website, notice: "New Novel Registered."
         else
-        render :new, status: :unprocessable_entity
+            render :new, status: :unprocessable_entity
         end
     end
 

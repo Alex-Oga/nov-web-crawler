@@ -2,12 +2,10 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
   resources :websites do
-    resources :novels, shallow: true
+    resources :novels, shallow: true do
+      resources :chapters, shallow: true
+    end
   end
-  resources :novels do
-    resources :chapters, shallow: true
-  end
-  root "websites#index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
