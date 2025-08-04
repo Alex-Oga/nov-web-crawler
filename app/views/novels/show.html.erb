@@ -4,7 +4,7 @@
 
 <div>
   <%= link_to "Edit this novel", edit_novel_path(@novel) %> |
-  <%= link_to "Back to novels", novels_path %>
+  <%= link_to "Back to novels", website_novels_path(@novel) %>
 
   <%= button_to "Destroy this novel", @novel, method: :delete %>
 </div>
