@@ -6,11 +6,10 @@
 
 <div id="chapters">
   <% @chapters.each do |chapter| %>
-    <%= render chapter %>
-    <p>
-      <%= link_to "Show this chapter", chapter %>
-    </p>
+    <div>
+      <%= link_to chapter.name, chapter %>
+    </div>
   <% end %>
 </div>
 
-<%= link_to "New chapter", new_chapter_path %>
+<%= link_to "New chapter", new_novel_chapter_path %>
