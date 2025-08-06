@@ -1,29 +1,11 @@
-# <% content_for :title, "New website" %>
+<% content_for :title, "New website" %>
 
-# <h1>New website</h1>
+<h1>New website</h1>
 
-# <%= render "form", website: @website %>
+<%= render "form", website: @website %>
 
-# <br>
+<br>
 
-# <div>
-#   <%= link_to "Back to websites", websites_path %>
-# </div>
-<h1>New Website</h1>
-
-<%= form_with model: @website do |form| %>
-  <div>
-    <%= form.label :name %>
-    <%= form.text_field :name %>
-  </div>
-
-  <div>
-    <%= form.label :url %>
-    <%= form.text_field :url %>
-  </div>
-
-  <div>
-    <%= form.submit "Create Website" %>
-  </div>
-  
-<% end %>
+<div>
+  <%= link_to "Back to websites", websites_path %>
+</div>
