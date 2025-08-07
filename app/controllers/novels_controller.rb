@@ -1,5 +1,5 @@
 class NovelsController < ApplicationController
-    allow_unauthenticated_access
+    allow_unauthenticated_access only: %i[ index show ]
     before_action :set_website, only: [:index, :new, :create]
     before_action :set_novel, only: [:show, :edit, :update]
 

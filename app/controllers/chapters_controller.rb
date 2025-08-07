@@ -1,5 +1,5 @@
 class ChaptersController < ApplicationController
-    allow_unauthenticated_access
+    allow_unauthenticated_access only: %i[ index show ]
     before_action :set_novel, only: [:index, :new, :create]
     before_action :set_chapter, only: [:show, :edit, :update]
 

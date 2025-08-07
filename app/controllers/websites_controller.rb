@@ -1,6 +1,6 @@
 class WebsitesController < ApplicationController
     allow_unauthenticated_access only: %i[ index show ]
-    before_action :set_website, only: %i[show edit update]
+    before_action :set_website, only: %i[show edit update destroy]
     
     def index
         @websites = Website.all
@@ -31,6 +31,11 @@ class WebsitesController < ApplicationController
         else
             render :edit, status: :unprocessable_entity
         end
+    end
+
+    def destroy
+        @website.destroy
+        redirect_to websites_path, notice: 'Website was successfully destroyed.'
     end
 
     private
