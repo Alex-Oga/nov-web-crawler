@@ -3,8 +3,11 @@
 <%= render @chapter %>
 
 <div>
-  <%= link_to "Edit this chapter", edit_chapter_path(@chapter) %> |
   <%= link_to "Back to chapters", novel_chapters_path(@chapter) %>
-
-  <%= button_to "Destroy this chapter", @chapter, method: :delete %>
 </div>
+
+<% if authenticated? %>
+  <%= link_to "Edit this chapter", edit_chapter_path(@chapter) %> 
+  <br>
+  <%= button_to "Delete", @chapter, method: :delete, data: { turbo_confirm: "Are you sure?" } %>
+<% end %>

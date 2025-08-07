@@ -3,8 +3,11 @@
 <%= render @novel %>
 
 <div>
-  <%= link_to "Edit this novel", edit_novel_path(@novel) %> |
   <%= link_to "Back to novels", website_novels_path(@novel) %>
-
-  <%= button_to "Destroy this novel", @novel, method: :delete %>
 </div>
+
+<% if authenticated? %>
+  <%= link_to "Edit this novel", edit_novel_path(@novel) %> 
+  <br>
+  <%= button_to "Delete", @novel, method: :delete, data: { turbo_confirm: "Are you sure?" } %>
+<% end %>

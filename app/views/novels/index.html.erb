@@ -4,6 +4,8 @@
 
 <h1>Novels</h1>
 
+<%= link_to "New Novel", new_website_novel_path if authenticated? %>
+
 <div id="novels">
   <% @novels.each do |novel| %>
     <div>
@@ -12,4 +14,4 @@
   <% end %>
 </div>
     
-<%= link_to "New novel", new_website_novel_path %>
+

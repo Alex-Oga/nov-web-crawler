@@ -4,6 +4,8 @@
 
 <h1>Chapters</h1>
 
+<%= link_to "New chapter", new_novel_chapter_path if authenticated? %>
+
 <div id="chapters">
   <% @chapters.each do |chapter| %>
     <div>
@@ -12,4 +14,3 @@
   <% end %>
 </div>
 
-<%= link_to "New chapter", new_novel_chapter_path %>
