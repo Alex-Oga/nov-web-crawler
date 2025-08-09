@@ -7,6 +7,7 @@ class WebsitesController < ApplicationController
     end
 
     def show
+        @novels = @website.novels
     end
 
     def new
@@ -39,10 +40,10 @@ class WebsitesController < ApplicationController
     end
 
     private
+
     def set_website
         @website = Website.find(params[:id])
     end
-
 
     def website_params
         params.expect(website: [ :name, :link ])

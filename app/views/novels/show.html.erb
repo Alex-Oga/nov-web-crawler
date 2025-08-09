@@ -2,6 +2,13 @@
 
 <%= render @novel %>
 
+<% @chapters.each do |chapter| %>
+    <div>
+    <%= link_to chapter.name, chapter %>
+    </div>
+<% end %>
+<br>
+
 <div>
   <%= link_to "Back to novels", website_novels_path(@novel) %>
 </div>

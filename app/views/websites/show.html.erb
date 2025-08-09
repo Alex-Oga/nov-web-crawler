@@ -1,6 +1,13 @@
 <p style="color: green"><%= notice %></p>
 <%= render @website %>
 
+<% @novels.each do |novel| %>
+    <div>
+    <%= link_to novel.name, novel %>
+    </div>
+<% end %>
+<br>
+
 <%= link_to "Back", websites_path %>
 <br>
 <% if authenticated? %>

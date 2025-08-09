@@ -8,6 +8,7 @@ class NovelsController < ApplicationController
     end
 
     def show
+        @chapters = @novel.chapters
     end
 
     def new
@@ -15,7 +16,7 @@ class NovelsController < ApplicationController
     end
 
     def create
-        @novel = @website.novel.build(novel_params)
+        @novel = @website.novels.build(novel_params)
         if @novel.save
             redirect_to @novel, notice: "New Novel Registered."
         else
