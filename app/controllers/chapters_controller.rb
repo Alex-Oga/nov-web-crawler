@@ -45,6 +45,6 @@ class ChaptersController < ApplicationController
     end
 
     def chapter_params
-        params.expect(chapter: [ :name, :link ])
+        params.expect(chapter: [ :name, :link, :content ])
     end
 end

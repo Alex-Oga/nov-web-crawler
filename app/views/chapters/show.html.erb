@@ -3,6 +3,12 @@
 <%= render @chapter %>
 
 <div>
+  <%= simple_format(@chapter.content) %>
+</div>
+
+<br>
+
+<div>
   <%= link_to "Back to chapters", novel_chapters_path(@chapter) %>
 </div>
 
