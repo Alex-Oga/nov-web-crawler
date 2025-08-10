@@ -1,6 +1,9 @@
 <h1><%= t ".title" %></h1>
 
+<div>
 <%= link_to "New Website", new_website_path if authenticated? %>
+</div>
+<br>
 
 <div id="websites">
   <% @websites.each do |website| %>

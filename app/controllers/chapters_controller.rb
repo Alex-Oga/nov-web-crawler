@@ -1,6 +1,7 @@
 class ChaptersController < ApplicationController
     allow_unauthenticated_access only: %i[ show ]
-    before_action :setter, only: [:show, :edit, :update, :new, :create]
+    before_action :set_chapter, only: [:show, :edit, :update]
+    before_action :set_novel, only: [:new, :create] 
 
     def show
     end
@@ -31,17 +32,12 @@ class ChaptersController < ApplicationController
 
     private
 
-    def set_novel
-        @novel = Novel.find(params[:novel_id])
-    end
-
     def set_chapter
         @chapter = Chapter.find(params[:id])
     end
 
-    def setter
-        @chapter = Chapter.find(params[:id])
-        @novel = @chapter.novel
+    def set_novel
+        @novel = Novel.find(params[:novel_id])
     end
 
     def chapter_params

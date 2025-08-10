@@ -3,13 +3,17 @@
 <%= render @chapter %>
 
 <div>
+  <%= link_to "Back To Chapters", @chapter.novel %>
+</div>
+
+<div>
   <%= simple_format(@chapter.content) %>
 </div>
 
 <br>
 
 <div>
-  <%= link_to "Back To Chapters", @novel %>
+  <%= link_to "Back To Chapters", @chapter.novel %>
 </div>
 
 <% if authenticated? %>
