@@ -1,11 +1,6 @@
 class ChaptersController < ApplicationController
-    allow_unauthenticated_access only: %i[ index show ]
-    before_action :set_novel, only: [:index, :new, :create]
-    before_action :set_chapter, only: [:show, :edit, :update]
-
-    def index
-        @chapters = @novel.chapters
-    end
+    allow_unauthenticated_access only: %i[ show ]
+    before_action :setter, only: [:show, :edit, :update, :new, :create]
 
     def show
     end
@@ -26,13 +21,13 @@ class ChaptersController < ApplicationController
     def edit
     end
 
-  def update
-    if @chapter.update(chapter_params)
-      redirect_to @chapter, notice: "Chapter was successfully updated."
-    else
-      render :edit, status: :unprocessable_entity
+    def update
+        if @chapter.update(chapter_params)
+            redirect_to @chapter, notice: "Chapter was successfully updated."
+        else
+            render :edit, status: :unprocessable_entity
+        end
     end
-  end
 
     private
 
@@ -42,6 +37,11 @@ class ChaptersController < ApplicationController
 
     def set_chapter
         @chapter = Chapter.find(params[:id])
+    end
+
+    def setter
+        @chapter = Chapter.find(params[:id])
+        @novel = @chapter.novel
     end
 
     def chapter_params

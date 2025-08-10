@@ -1,11 +1,6 @@
 class NovelsController < ApplicationController
-    allow_unauthenticated_access only: %i[ index show ]
-    before_action :set_website, only: [:index, :new, :create]
-    before_action :set_novel, only: [:show, :edit, :update]
-
-    def index
-        @novels = @website.novels
-    end
+    allow_unauthenticated_access only: %i[ show ]
+    before_action :setter, only: [:show, :edit, :update, :new, :create]
 
     def show
         @chapters = @novel.chapters
@@ -26,23 +21,20 @@ class NovelsController < ApplicationController
 
     def edit
     end
-
-  def update
-    if @novel.update(novel_params)
-      redirect_to @novel, notice: "Novel was successfully updated."
-    else
-      render :edit, status: :unprocessable_entity
+    
+    def update
+        if @novel.update(novel_params)
+            redirect_to @novel, notice: "Novel was successfully updated."
+        else
+            render :edit, status: :unprocessable_entity
+        end
     end
-  end
 
     private
 
-    def set_website
-        @website = Website.find(params[:website_id])
-    end
-
-    def set_novel
+    def setter
         @novel = Novel.find(params[:id])
+        @website = @novel.website
     end
 
     def novel_params

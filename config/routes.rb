@@ -2,8 +2,8 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
   resources :websites do
-    resources :novels, shallow: true do
-      resources :chapters, shallow: true
+    resources :novels, except: [:index], shallow: true do
+      resources :chapters, except: [:index], shallow: true
     end
   end
 

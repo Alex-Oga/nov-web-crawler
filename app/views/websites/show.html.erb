@@ -8,10 +8,10 @@
 <% end %>
 <br>
 
-<%= link_to "Back", websites_path %>
+<%= link_to "Back To Websites", websites_path %>
 <br>
 <% if authenticated? %>
-<%= link_to "Edit", edit_website_path(@website) %>
+<%= link_to "Edit This Website", edit_website_path(@website) %>
 <br>
 <%= button_to "Delete", @website, method: :delete, data: { turbo_confirm: "Are you sure?" } %>
 <% end %>

@@ -2,6 +2,11 @@
 
 <%= render @novel %>
 
+<div>
+  <%= link_to "New Chapter", new_novel_chapter_path(@novel) if authenticated? %>
+</div>
+<br>
+
 <% @chapters.each do |chapter| %>
     <div>
     <%= link_to chapter.name, chapter %>
@@ -10,11 +15,11 @@
 <br>
 
 <div>
-  <%= link_to "Back to novels", website_novels_path(@novel) %>
+  <%= link_to "Back To #{@website.name} Novels", @website %>
 </div>
 
 <% if authenticated? %>
-  <%= link_to "Edit this novel", edit_novel_path(@novel) %> 
+  <%= link_to "Edit This Novel", edit_novel_path(@novel) %> 
   <br>
   <%= button_to "Delete", @novel, method: :delete, data: { turbo_confirm: "Are you sure?" } %>
 <% end %>

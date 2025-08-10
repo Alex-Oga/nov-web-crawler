@@ -9,11 +9,11 @@
 <br>
 
 <div>
-  <%= link_to "Back to chapters", novel_chapters_path(@chapter) %>
+  <%= link_to "Back To Chapters", @novel %>
 </div>
 
 <% if authenticated? %>
-  <%= link_to "Edit this chapter", edit_chapter_path(@chapter) %> 
+  <%= link_to "Edit This Chapter", edit_chapter_path(@chapter) %> 
   <br>
   <%= button_to "Delete", @chapter, method: :delete, data: { turbo_confirm: "Are you sure?" } %>
 <% end %>
