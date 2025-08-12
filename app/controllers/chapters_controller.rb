@@ -1,9 +1,21 @@
+require 'nokogiri'
+require 'open-uri'
+
 class ChaptersController < ApplicationController
     allow_unauthenticated_access only: %i[ show ]
     before_action :set_chapter, only: [:show, :edit, :update]
     before_action :set_novel, only: [:new, :create] 
 
     def show
+        begin
+            if @chapter.link.present?
+                doc = Nokogiri::HTML(URI.open(@chapter.link))
+                @content = doc.css('p').map(&:text)
+            end
+        rescue Socket::ResolutionError, Net::TimeoutError => e
+            Rails.logger.error "Failed to fetch content: #{e.message}"
+            @content = ["Content temporarily unavailable"]
+        end
     end
 
     def new
