@@ -10,7 +10,7 @@ class ChaptersController < ApplicationController
         begin
             if @chapter.link.present?
                 doc = Nokogiri::HTML(URI.open(@chapter.link))
-                @content = doc.css('p').map(&:text)
+                @content = doc.css('p')
             end
         rescue Socket::ResolutionError, Net::TimeoutError => e
             Rails.logger.error "Failed to fetch content: #{e.message}"
