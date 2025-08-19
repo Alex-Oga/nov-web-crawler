@@ -8,9 +8,10 @@ class ChaptersController < ApplicationController
 
     def show
         begin
-            if @chapter.link.present?
+            if (@chapter.link.present? && !@chapter.content.present?)
                 doc = Nokogiri::HTML(URI.open(@chapter.link))
                 @content = doc.css('p')
+                @chapter.update(content: @content)
             end
         rescue Socket::ResolutionError, Net::TimeoutError => e
             Rails.logger.error "Failed to fetch content: #{e.message}"
