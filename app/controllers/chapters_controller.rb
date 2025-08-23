@@ -10,8 +10,32 @@ class ChaptersController < ApplicationController
         begin
             if (@chapter.link.present? && !@chapter.content.present?)
                 doc = Nokogiri::HTML(URI.open(@chapter.link))
-                @content = doc.css('p')
-                @chapter.update(content: @content)
+            
+                # Get all paragraphs and group by parent class
+                content_by_class = {}
+                
+                doc.css('p').each do |p|
+                    # Create a unique key based on the full path to avoid mixing content
+                    parent_path = p.ancestors.map { |a| a['class'] }.compact.join(' > ')
+                    parent_path = p.parent['class'] || 'no-class' if parent_path.empty?
+                    
+                    text = p.text.strip
+                    next if text.empty?
+                    content_by_class[parent_path] ||= []
+                    content_by_class[parent_path] << text
+                end
+                # Find the class with the largest total content
+                largest_class = content_by_class.max_by { |class_name, paragraphs| 
+                    paragraphs.join(' ').length 
+                }
+            
+                if largest_class
+                    @content = largest_class[1] # Get the paragraphs array
+                    Rails.logger.info "Selected class '#{largest_class[0]}' with #{@content.length} paragraphs"
+                    @chapter.update(content: @content.join("\n\n"))
+                else
+                    @content = ["No content found"]
+                end
             end
         rescue Socket::ResolutionError, Net::TimeoutError => e
             Rails.logger.error "Failed to fetch content: #{e.message}"
