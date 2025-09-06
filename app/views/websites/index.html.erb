@@ -1,5 +1,39 @@
 <h1><%= t ".title" %></h1>
 
+<div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+  <h3>Scrape Chapters from NovelUpdates</h3>
+  <%= form_with url: websites_path(@website), method: :get, local: true do |form| %>
+    <%= form.label :scrape_url, "NovelUpdates URL:" %>
+    <%= form.url_field :scrape_url, placeholder: "https://www.novelupdates.com/series/novel-name/", 
+                       style: "width: 400px; margin: 0 10px;", 
+                       value: params[:scrape_url] %>
+    <%= form.submit "Scrape Chapters", style: "padding: 8px 16px;" %>
+  <% end %>
+</div>
+
+<% if @chapter_data && @chapter_data.any? %>
+  <h3>Latest Chapters from NovelUpdates</h3>
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Group</th>
+        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Chapter</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @chapter_data.each do |data| %>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 8px;"><%= data[:group_name] %></td>
+          <td style="border: 1px solid #ddd; padding: 8px;">
+            <a href="<%= data[:chapter_url] %>" target="_blank"><%= data[:chapter_title] %></a>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <br>
+<% end %>
+
 <div>
 <%= link_to "New Website", new_website_path if authenticated? %>
 </div>
