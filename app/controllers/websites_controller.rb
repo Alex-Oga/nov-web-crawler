@@ -1,3 +1,8 @@
+require 'nokogiri'
+require 'watir'
+require 'uri'
+require 'ferrum'
+
 class WebsitesController < ApplicationController
     allow_unauthenticated_access only: %i[ index show ]
     before_action :set_website, only: %i[show edit update destroy]

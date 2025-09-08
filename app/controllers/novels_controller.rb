@@ -1,8 +1,3 @@
-require 'nokogiri'
-require 'watir'
-require 'uri'
-require 'ferrum'
-
 class NovelsController < ApplicationController
     allow_unauthenticated_access only: %i[ show ]
     before_action :set_novel, only: [:show, :edit, :update]
