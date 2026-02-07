@@ -32,6 +32,9 @@ class NovelUpdatesScraperService
   end
 
   def login_to_site
+    # Set page timeout
+    @browser.timeout = 30
+
     @browser.go_to("https://www.novelupdates.com/login/")
     
     # Wait for page to load and fill in login credentials
