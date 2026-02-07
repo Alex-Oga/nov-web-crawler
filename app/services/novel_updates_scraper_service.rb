@@ -100,6 +100,7 @@ class NovelUpdatesScraperService
     # Set target group from the first chapter found
     if @target_group.nil?
       @target_group = group_name
+      @group_link = group_url
       Rails.logger.info "Target group set to: #{@target_group}"
     end
 
