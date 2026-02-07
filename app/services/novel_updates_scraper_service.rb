@@ -7,6 +7,8 @@ class NovelUpdatesScraperService
     @scrape_url = scrape_url
     @chapter_data = []
     @browser = nil
+    @target_group = nil
+    @group_link = nil
   end
 
   def scrape_chapters
@@ -16,6 +18,12 @@ class NovelUpdatesScraperService
       setup_browser
       login_to_site
       navigate_and_scrape
+      
+      # Process and save the scraped data
+      if @chapter_data.any?
+        process_scraped_data
+      end
+      
       @chapter_data
     rescue => e
       Rails.logger.error "Browser automation error: #{e.message}"
@@ -87,6 +95,16 @@ class NovelUpdatesScraperService
     # Extract group name and URL from second cell
     group_link = cells[1].at_css('a')
     group_name = group_link&.text&.strip || 'Unknown'
+    group_url = group_link&.[]('href')
+
+    # Set target group from the first chapter found
+    if @target_group.nil?
+      @target_group = group_name
+      Rails.logger.info "Target group set to: #{@target_group}"
+    end
+
+    # Skip chapters not from the target group
+    return unless group_name == @target_group
     
     # Extract chapter title and URL from third cell
     chapter_link = cells[2].at_css('a')
@@ -169,6 +187,126 @@ class NovelUpdatesScraperService
         end
       end
     end
+  end
+
+  def process_scraped_data
+    return unless @target_group && @chapter_data.any?
+
+    Rails.logger.info "Processing scraped data for group: #{@target_group}"
+    
+    # Step 1: Find or create website based on group name
+    website = find_or_create_website
+    
+    # Step 2: Extract novel name from URL and find or create novel
+    novel = find_or_create_novel(website)
+    
+    # Step 3: Create chapters (skip duplicates)
+    create_chapters(novel)
+    
+    Rails.logger.info "Data processing complete"
+  end
+
+  def find_or_create_website
+    # Check if website with this group name already exists
+    website = Website.find_by(name: @target_group)
+    
+    if website
+      Rails.logger.info "Found existing website: #{website.name}"
+      return website
+    end
+    
+    # Create new website
+    website = Website.create!(
+      name: @target_group,
+      link: @group_link
+    )
+    
+    Rails.logger.info "Created new website: #{website.name}"
+    website
+  end
+
+  def find_or_create_novel(website)
+    # Extract novel name from URL
+    novel_name = extract_novel_name_from_url
+    return nil unless novel_name
+    
+    # Clean novel link (remove everything after the novel name)
+    clean_novel_link = clean_novel_url
+    
+    # Check if novel with this name already exists for this website
+    novel = Novel.find_by(name: novel_name, website: website)
+    
+    if novel
+      Rails.logger.info "Found existing novel: #{novel.name}"
+      return novel
+    end
+    
+    # Create new novel
+    novel = Novel.create!(
+      name: novel_name,
+      link: clean_novel_link,
+      website: website
+    )
+    
+    Rails.logger.info "Created new novel: #{novel.name}"
+    novel
+  end
+
+  def extract_novel_name_from_url
+    # Extract novel name from URL like: https://www.novelupdates.com/series/NovelName/
+    match = @scrape_url.match(%r{/series/([^/?]+)})
+    if match
+      novel_name = match[1].gsub('-', ' ').titleize
+      Rails.logger.info "Extracted novel name: #{novel_name}"
+      return novel_name
+    end
+    
+    Rails.logger.error "Could not extract novel name from URL: #{@scrape_url}"
+    nil
+  end
+
+  def clean_novel_url
+    # Clean URL to remove everything after /NovelName/
+    match = @scrape_url.match(%r{(https://www\.novelupdates\.com/series/[^/?]+)})
+    if match
+      clean_url = "#{match[1]}/"
+      Rails.logger.info "Cleaned novel URL: #{clean_url}"
+      return clean_url
+    end
+    
+    Rails.logger.warn "Could not clean novel URL, using original: #{@scrape_url}"
+    @scrape_url
+  end
+
+  def create_chapters(novel)
+    return unless novel
+    
+    created_count = 0
+    skipped_count = 0
+    
+    @chapter_data.each do |chapter_data|
+      # Check if chapter already exists
+      existing_chapter = Chapter.find_by(
+        name: chapter_data[:chapter_title],
+        novel: novel
+      )
+      
+      if existing_chapter
+        skipped_count += 1
+        next
+      end
+      
+      # Create new chapter
+      Chapter.create!(
+        name: chapter_data[:chapter_title],
+        link: chapter_data[:chapter_url],
+        novel: novel
+      )
+      
+      created_count += 1
+    end
+    
+    Rails.logger.info "Created #{created_count} new chapters, skipped #{skipped_count} existing chapters"
   end
 
   def cleanup_browser
