@@ -17,7 +17,13 @@ class Session < ApplicationRecord
     expires_at <= Time.current
   end
   
+  # def touch_activity!
+  #   update!(expires_at: EXPIRY_TIME.from_now)
+  # end
+
   def touch_activity!
+  # Only update once per hour instead of every request
+  if updated_at < 1.hour.ago
     update!(expires_at: EXPIRY_TIME.from_now)
   end
   
