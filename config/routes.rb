@@ -2,6 +2,10 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
   resources :websites do
+    collection do
+      post :scrape_content
+    end
+    
     resources :novels, except: [:index], shallow: true do
       resources :chapters, except: [:index], shallow: true
     end

@@ -16,6 +16,17 @@ class WebsitesController < ApplicationController
             @chapter_data = scraper.scrape_chapters
         end
     end
+    
+    def scrape_content
+        @websites = Website.all
+        @chapter_data = []
+        
+        # Run batch scraping
+        scraper = BatchChapterScraperService.new
+        @scrape_results = scraper.scrape_all_content
+        
+        render :index
+    end
 
     def show
         @novels = @website.novels
@@ -59,5 +70,4 @@ class WebsitesController < ApplicationController
     def website_params
         params.expect(website: [ :name, :link ])
     end
-
 end

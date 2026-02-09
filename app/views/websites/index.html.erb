@@ -11,6 +11,22 @@
   <% end %>
 </div>
 
+<div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+  <h3>Batch Scrape Chapter Content</h3>
+  <p>Scrape content for all chapters that don't have content yet.</p>
+  
+  <%= form_with url: scrape_content_websites_path, method: :post, local: true, style: "display: inline;" do |form| %>
+    <%= form.submit "Scrape Content", 
+        style: "padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;",
+        confirm: "This will scrape content for all empty chapters. This may take a while. Continue?" %>
+  <% end %>
+  
+  <% empty_chapters_count = Chapter.where(content: [nil, '']).count %>
+  <small style="color: #666; margin-left: 10px;">
+    <%= empty_chapters_count %> chapters need content
+  </small>
+</div>
+
 <% if @chapter_data && @chapter_data.any? %>
   <h3>Latest Chapters from NovelUpdates</h3>
   <table style="width: 100%; border-collapse: collapse;">
@@ -32,6 +48,14 @@
     </tbody>
   </table>
   <br>
+<% end %>
+
+<% if @scrape_results %>
+  <div style="margin: 20px 0; padding: 20px; border: 1px solid #28a745; border-radius: 5px; background-color: #d4edda;">
+    <h3>Content Scraping Results</h3>
+    <p><strong>Scraped:</strong> <%= @scrape_results[:stats][:scraped] %> chapters</p>
+    <p><strong>Failed:</strong> <%= @scrape_results[:stats][:failed] %> chapters</p>
+  </div>
 <% end %>
 
 <div>
