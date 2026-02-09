@@ -8,3 +8,6 @@
 #     command: "SoftDeletedRecord.due.delete_all"
 #     priority: 2
 #     schedule: at 5am every day
+cleanup_sessions:
+  class: SessionCleanupJob
+  schedule: every day at 3am

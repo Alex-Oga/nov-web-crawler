@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_06_124532) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_09_065610) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -65,8 +65,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_124532) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
-    t.integer "source_id"
-    t.index ["source_id"], name: "index_novels_on_source_id"
     t.index ["website_id"], name: "index_novels_on_website_id"
   end
 
@@ -76,15 +74,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_124532) do
     t.string "user_agent"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "session_token", null: false
+    t.datetime "expires_at", null: false
+    t.index ["expires_at"], name: "index_sessions_on_expires_at"
+    t.index ["session_token"], name: "index_sessions_on_session_token", unique: true
+    t.index ["user_id", "expires_at"], name: "index_sessions_on_user_id_and_expires_at"
     t.index ["user_id"], name: "index_sessions_on_user_id"
-  end
-
-  create_table "sources", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "link"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["link"], name: "index_sources_on_link", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -105,7 +100,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_124532) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "chapters", "novels"
-  add_foreign_key "novels", "sources"
   add_foreign_key "novels", "websites"
   add_foreign_key "sessions", "users"
 end
