@@ -10,11 +10,16 @@ class WebsitesController < ApplicationController
     def index
         @websites = Website.all
         @chapter_data = []
+        @scrape_error = nil
 
         if params[:scrape_url].present?
-            scraper = NovelUpdatesScraperService.new(params[:scrape_url])
-            @chapter_data = scraper.scrape_chapters
+        scraper = NovelUpdatesScraperService.new(params[:scrape_url])
+        @chapter_data = scraper.scrape_chapters
+        
+        if @chapter_data.empty?
+            @scrape_error = "Invalid URL or scraping failed. Please use a NovelUpdates series URL."
         end
+    end
     end
     
     def scrape_content

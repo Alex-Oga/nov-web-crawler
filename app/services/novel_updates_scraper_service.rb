@@ -14,6 +14,12 @@ class NovelUpdatesScraperService
   def scrape_chapters
     return [] unless @scrape_url.present?
 
+    # Validate URL format
+    unless valid_novelupdates_url?
+      Rails.logger.error "Invalid NovelUpdates URL: #{@scrape_url}"
+      return []
+    end
+
     begin
       setup_browser
       login_to_site
@@ -34,6 +40,34 @@ class NovelUpdatesScraperService
   end
 
   private
+
+  def valid_novelupdates_url?
+    return false unless @scrape_url.is_a?(String)
+    
+    # Check if URL starts with the required prefix
+    return false unless @scrape_url.start_with?('https://www.novelupdates.com/series/')
+    
+    # Optional: Additional validation
+    begin
+      uri = URI.parse(@scrape_url)
+      
+      # Ensure it's a valid URI
+      return false unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+      
+      # Ensure correct host
+      return false unless uri.host == 'www.novelupdates.com'
+      
+      # Ensure path starts correctly
+      return false unless uri.path.start_with?('/series/')
+      
+      Rails.logger.info "Valid NovelUpdates URL: #{@scrape_url}"
+      true
+      
+    rescue URI::InvalidURIError => e
+      Rails.logger.error "Invalid URI format: #{e.message}"
+      false
+    end
+  end
 
   def setup_browser
     @browser = Ferrum::Browser.new(headless: false)
@@ -208,8 +242,8 @@ class NovelUpdatesScraperService
   end
 
   def find_or_create_website
-    # Check if website with this group name already exists
-    website = Website.find_by(name: @target_group)
+    # Check if website with this group link already exists
+    website = Website.find_by(link: @group_link)
     
     if website
       Rails.logger.info "Found existing website: #{website.name}"
@@ -227,20 +261,21 @@ class NovelUpdatesScraperService
   end
 
   def find_or_create_novel(website)
-    # Extract novel name from URL
-    novel_name = extract_novel_name_from_url
-    return nil unless novel_name
-    
-    # Clean novel link (remove everything after the novel name)
+    # Extract clean novel link from URL
     clean_novel_link = clean_novel_url
+    return nil unless clean_novel_link
     
     # Check if novel with this name already exists for this website
-    novel = Novel.find_by(name: novel_name, website: website)
+    novel = Novel.find_by(link: clean_novel_link, website: website)
     
     if novel
       Rails.logger.info "Found existing novel: #{novel.name}"
       return novel
     end
+
+    # Extract novel name for new novel creation
+    novel_name = extract_novel_name_from_url
+    return nil unless novel_name
     
     # Create new novel
     novel = Novel.create!(
