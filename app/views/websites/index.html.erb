@@ -1,15 +1,15 @@
 <h1><%= t ".title" %></h1>
 
 <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
-  <h3>Scrape Chapters from NovelUpdates</h3>
+  <h3>NovelUpdates Series Finder</h3>
   <%= form_with url: websites_path(@website), method: :get, local: true do |form| %>
     <%= form.label :scrape_url, "NovelUpdates URL:" %>
     <%= form.url_field :scrape_url, placeholder: "https://www.novelupdates.com/series/novel-name/", 
                        style: "width: 400px; margin: 0 10px;", 
                        value: params[:scrape_url] %>
-    <%= form.submit "Scrape Chapters", style: "padding: 8px 16px;" %>
+    <%= form.submit "Update Novel Library", style: "padding: 8px 16px;" %>
   <% end %>
-  
+
   <% if @scrape_error %>
     <div style="margin-top: 10px; padding: 10px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px;">
       <strong>Error:</strong> <%= @scrape_error %>
@@ -18,18 +18,17 @@
 </div>
 
 <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-  <h3>Batch Scrape Chapter Content</h3>
-  <p>Scrape content for all chapters that don't have content yet.</p>
+  <h3>Refresh Novel Content</h3>
   
   <%= form_with url: scrape_content_websites_path, method: :post, local: true, style: "display: inline;" do |form| %>
-    <%= form.submit "Scrape Content", 
+    <%= form.submit "Fill All Empty Chapters", 
         style: "padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;",
         confirm: "This will scrape content for all empty chapters. This may take a while. Continue?" %>
   <% end %>
   
   <% empty_chapters_count = Chapter.where(content: [nil, '']).count %>
   <small style="color: #666; margin-left: 10px;">
-    <%= empty_chapters_count %> chapters need content
+    <%= empty_chapters_count %> Chapters Are Empty
   </small>
 </div>
 
