@@ -22,9 +22,10 @@ class Session < ApplicationRecord
   # end
 
   def touch_activity!
-  # Only update once per hour instead of every request
-  if updated_at < 1.hour.ago
-    update!(expires_at: EXPIRY_TIME.from_now)
+    # Only update once per hour instead of every request
+    if updated_at < 1.hour.ago
+      update!(expires_at: EXPIRY_TIME.from_now)
+    end
   end
   
   def self.find_by_token(token)
