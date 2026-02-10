@@ -4,7 +4,10 @@ require 'uri'
 require 'ferrum'
 
 class WebsitesController < ApplicationController
+    include AdminAuthorization
+    
     allow_unauthenticated_access only: %i[ index show ]
+    before_action :require_admin, only: %i[ new create edit update destroy scrape_content ]
     before_action :set_website, only: %i[show edit update destroy]
     
     def index
@@ -26,7 +29,7 @@ class WebsitesController < ApplicationController
         @websites = Website.all
         @chapter_data = []
         
-        # Run batch scraping
+        # Admin-only batch scraping
         scraper = BatchChapterScraperService.new
         @scrape_results = scraper.scrape_all_content
         

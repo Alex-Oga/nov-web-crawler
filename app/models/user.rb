@@ -15,4 +15,8 @@ class User < ApplicationRecord
   def terminate_other_sessions!(except_session)
     sessions.where.not(id: except_session.id).destroy_all
   end
+
+  def admin?
+    admin
+  end
 end

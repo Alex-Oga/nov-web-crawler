@@ -3,7 +3,7 @@
 
 
 <div>
-  <%= link_to "New Novel", new_website_novel_path(@website) if authenticated? %>
+  <%= link_to "New Novel", new_website_novel_path(@website) if current_user&.admin? %>
 </div>
 <br>
 
@@ -16,7 +16,7 @@
 
 <%= link_to "Back To Websites", websites_path %>
 <br>
-<% if authenticated? %>
+<% if current_user&.admin? %>
 <%= link_to "Edit This Website", edit_website_path(@website) %>
 <br>
 <%= button_to "Delete", @website, method: :delete, data: { turbo_confirm: "Are you sure?" } %>

@@ -3,7 +3,7 @@
 <%= render @novel %>
 
 <div>
-  <%= link_to "New Chapter", new_novel_chapter_path(@novel) if authenticated? %>
+  <%= link_to "New Chapter", new_novel_chapter_path(@novel) if current_user&.admin? %>
 </div>
 <br>
 
@@ -18,7 +18,7 @@
   <%= link_to "Back To #{@novel.website.name} Novels", @novel.website %>
 </div>
 
-<% if authenticated? %>
+<% if current_user&.admin? %>
   <%= link_to "Edit This Novel", edit_novel_path(@novel) %> 
   <br>
   <%= button_to "Delete", @novel, method: :delete, data: { turbo_confirm: "Are you sure?" } %>

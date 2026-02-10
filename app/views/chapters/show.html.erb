@@ -14,7 +14,7 @@
   <%= link_to "Back To Chapters", @chapter.novel %>
 </div>
 
-<% if authenticated? %>
+<% if current_user&.admin? %>
   <%= link_to "Edit This Chapter", edit_chapter_path(@chapter) %> 
   <br>
   <%= button_to "Delete", @chapter, method: :delete, data: { turbo_confirm: "Are you sure?" } %>
