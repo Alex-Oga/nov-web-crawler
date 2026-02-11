@@ -7,6 +7,15 @@
 </div>
 <br>
 
+<% if authenticated? %>
+<% empty_chapters_count = @novel.chapters.where(content: [nil, '']).count %>
+  <small style="color: #666; margin-left: 10px;">
+    <%= empty_chapters_count %> Chapters Are Empty
+  </small>
+  <%= button_to "Batch Scrape Chapters", batch_scrape_novel_path(@novel), method: :post, data: { turbo_confirm: "Scrape all chapters for this novel?" } %>
+<% end %>
+<br>
+
 <% @chapters.each do |chapter| %>
     <div>
     <%= link_to chapter.name, chapter %>

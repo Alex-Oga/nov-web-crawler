@@ -7,6 +7,9 @@ Rails.application.routes.draw do
     end
     
     resources :novels, except: [:index], shallow: true do
+      member do
+        post :batch_scrape
+      end
       resources :chapters, except: [:index], shallow: true
     end
   end
