@@ -3,7 +3,7 @@ require 'open-uri'
 
 class ChaptersController < ApplicationController
     allow_unauthenticated_access only: %i[ show ]
-    before_action :set_chapter, only: [:show, :edit, :update]
+    before_action :set_chapter, only: [:show, :edit, :update, :destroy]
     before_action :set_novel, only: [:new, :create] 
 
     def show
@@ -32,6 +32,13 @@ class ChaptersController < ApplicationController
         else
             render :edit, status: :unprocessable_entity
         end
+    end
+
+    def destroy
+        @chapter = Chapter.find(params[:id])
+        novel = @chapter.novel
+        @chapter.destroy
+        redirect_to novel, notice: "Chapter was successfully deleted."
     end
 
     private
