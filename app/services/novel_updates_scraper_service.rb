@@ -148,14 +148,18 @@ class NovelUpdatesScraperService
 
     chapter_title = chapter_link.text.strip
     chapter_url = chapter_link['href']
-    
-    # Follow redirect to get actual URL
-    actual_url = follow_redirect(chapter_url)
+
+    # Make URL absolute if it starts with //
+    if chapter_url.start_with?('//')
+      chapter_url = "https:#{chapter_url}"
+    elsif chapter_url.start_with?('/')
+      chapter_url = "https://www.novelupdates.com#{chapter_url}"
+    end
     
     @chapter_data << {
       group_name: group_name,
       chapter_title: chapter_title,
-      chapter_url: actual_url
+      chapter_url: chapter_url
     }
   end
 
@@ -180,47 +184,6 @@ class NovelUpdatesScraperService
       "https://www.novelupdates.com#{url}"
     else
       url
-    end
-  end
-
-  def follow_redirect(redirect_url)
-    begin
-      # Make URL absolute if it starts with //
-      if redirect_url.start_with?('//')
-        redirect_url = "https:#{redirect_url}"
-      elsif redirect_url.start_with?('/')
-        redirect_url = "https://www.novelupdates.com#{redirect_url}"
-      end
-      
-      # Create a new page/tab to follow the redirect
-      new_page = @browser.create_page
-      new_page.go_to(redirect_url)
-      
-      sleep(0.5)
-
-      final_url = redirect_url
-
-      loop do
-        # Get the final URL after redirect
-        final_url = new_page.current_url
-        break if new_page.current_url != redirect_url && new_page.current_url != 'about:blank'
-        sleep(0.5)
-      end
-      
-      final_url
-      
-    rescue => e
-      Rails.logger.error "Error following redirect for #{redirect_url}: #{e.message}"
-      redirect_url
-    ensure
-      # Ensure page is closed even if there's an error
-      if new_page
-        begin
-          new_page.close
-        rescue => close_error
-          # Ignore close errors since we're just cleaning up
-        end
-      end
     end
   end
 
