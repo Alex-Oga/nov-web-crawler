@@ -1,21 +1,22 @@
 <h1><%= t ".title" %></h1>
 
-<div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
-  <h3>NovelUpdates Series Finder</h3>
-  <%= form_with url: websites_path(@website), method: :get, local: true do |form| %>
-    <%= form.label :scrape_url, "NovelUpdates URL:" %>
-    <%= form.url_field :scrape_url, placeholder: "https://www.novelupdates.com/series/novel-name/", 
-                       style: "width: 400px; margin: 0 10px;", 
-                       value: params[:scrape_url] %>
-    <%= form.submit "Update Novel Library", style: "padding: 8px 16px;" %>
-  <% end %>
-
-  <% if @scrape_error %>
-    <div style="margin-top: 10px; padding: 10px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px;">
-      <strong>Error:</strong> <%= @scrape_error %>
-    </div>
-  <% end %>
-</div>
+<% if authenticated? %>
+  <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+    <h3>NovelUpdates Series Finder</h3>
+      <%= form_with url: websites_path(@website), method: :get, local: true do |form| %>
+        <%= form.label :scrape_url, "NovelUpdates URL:" %>
+        <%= form.url_field :scrape_url, placeholder: "https://www.novelupdates.com/series/novel-name/", 
+                          style: "width: 400px; margin: 0 10px;", 
+                          value: params[:scrape_url] %>
+        <%= form.submit "Update Novel Library", style: "padding: 8px 16px;" %>
+      <% end %>
+      <% if @scrape_error %>
+          <div style="margin-top: 10px; padding: 10px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px;">
+            <strong>Error:</strong> <%= @scrape_error %>
+          </div>
+      <% end %>
+  </div>
+<% end %>
 
 <% if current_user&.admin? %>
   <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
