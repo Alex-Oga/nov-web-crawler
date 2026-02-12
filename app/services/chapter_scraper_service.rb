@@ -42,7 +42,7 @@ class ChapterScraperService
 
   def setup_browser
     @browser = Ferrum::Browser.new(
-      headless: true,
+      headless: false,
       timeout: 30,
       browser_options: {
         'no-sandbox': nil,
@@ -56,20 +56,41 @@ class ChapterScraperService
 
   def try_simple_fetch(chapter)
     begin
+      # Try fast browser fetch first (headless DOM) — cheaper than full extraction path
       @browser.go_to(chapter.link)
       wait_for_content_load
       page_source = @browser.body
       doc = Nokogiri::HTML(page_source)
-      return extract_main_content(doc)
+      content = extract_main_content(doc)
+
+      # If content is too small, try the more thorough browser extraction path
+      if total_words(content) < MIN_WORD_COUNT
+        Rails.logger.debug "Simple fetch produced #{total_words(content)} words (<#{MIN_WORD_COUNT}), falling back to try_browser_fetch for #{chapter.name}"
+        alt = try_browser_fetch(chapter)
+        return alt if alt.present? && !alt.include?("No content found")
+      end
+
+      return content
     rescue => e
-      Rails.logger.debug "Try_simple_fetch failed for #{chapter.name}: #{e.message}"
+      Rails.logger.debug "Try_simple_fetch (browser step) failed for #{chapter.name}: #{e.message}"
     end
-    
-    doc = Nokogiri::HTML(URI.open(chapter.link))
-    extract_main_content(doc)
-  rescue => e
-    Rails.logger.debug "Simple fetch failed for #{chapter.name}: #{e.message}"
-    []
+
+    begin
+      # Fallback to a simple open-uri fetch
+      doc = Nokogiri::HTML(URI.open(chapter.link))
+      content = extract_main_content(doc)
+
+      if total_words(content) < MIN_WORD_COUNT && @browser
+        Rails.logger.debug "Open-uri fetch produced #{total_words(content)} words (<#{MIN_WORD_COUNT}), falling back to try_browser_fetch for #{chapter.name}"
+        alt = try_browser_fetch(chapter)
+        return alt if alt.present? && !alt.include?("No content found")
+      end
+
+      content
+    rescue => e
+      Rails.logger.debug "Simple fetch failed for #{chapter.name}: #{e.message}"
+      []
+    end
   end
 
   def try_browser_fetch(chapter)
@@ -111,6 +132,11 @@ class ChapterScraperService
     doc = Nokogiri::HTML(html)
     paragraphs = doc.css('p').select { |p| p.text.strip.length > 50 }
     paragraphs.length > 3
+  end
+
+  def total_words(content_array)
+    return 0 unless content_array.is_a?(Array)
+    content_array.join(' ').split.size
   end
 
   # Copy the extraction methods from ChapterScraperService
