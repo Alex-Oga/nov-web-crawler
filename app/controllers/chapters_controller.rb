@@ -8,6 +8,8 @@ class ChaptersController < ApplicationController
 
     def show
         @content = ChapterScraperService.new(@chapter).scrape_content
+        @previous_chapter = @chapter.previous_chapter
+        @next_chapter = @chapter.next_chapter
     end
 
     def new

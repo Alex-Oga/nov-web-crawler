@@ -198,8 +198,8 @@ class NovelUpdatesScraperService
     # Step 2: Extract novel name from URL and find or create novel
     novel = find_or_create_novel(website)
     
-    # Step 3: Create chapters (skip duplicates)
-    create_chapters(novel)
+    # Step 3: Create or sync chapters (ensure proper positions)
+    sync_positions_from_source(novel, @chapter_data) if novel
     
     Rails.logger.info "Data processing complete"
   end
@@ -277,35 +277,87 @@ class NovelUpdatesScraperService
     @scrape_url
   end
 
-  def create_chapters(novel)
-    return unless novel
-    
-    created_count = 0
-    skipped_count = 0
-    
-    @chapter_data.each do |chapter_data|
-      # Check if chapter already exists
-      existing_chapter = Chapter.find_by(
-        name: chapter_data[:chapter_title],
-        novel: novel
-      )
-      
-      if existing_chapter
-        skipped_count += 1
-        next
-      end
-      
-      # Create new chapter
-      Chapter.create!(
-        name: chapter_data[:chapter_title],
-        link: chapter_data[:chapter_url],
-        novel: novel
-      )
-      
-      created_count += 1
+  # New: sync positions from the source list (handles inserted chapters)
+  def sync_positions_from_source(novel, source_chapter_list)
+    return unless novel && source_chapter_list.present?
+
+    # Make a working copy
+    source_list = source_chapter_list.map do |cd|
+      {
+        title: cd[:chapter_title].to_s.strip,
+        link: cd[:chapter_url].to_s.strip
+      }
     end
-    
-    Rails.logger.info "Created #{created_count} new chapters, skipped #{skipped_count} existing chapters"
+
+    # If scraped newest-first, reverse to be oldest->newest
+    source_list.reverse! if looks_newest_first?(source_list)
+
+    ActiveRecord::Base.transaction do
+      source_list.each_with_index do |cd, idx|
+        pos = idx + 1
+        title = cd[:title]
+        link = cd[:link]
+
+        chapter = nil
+        # Prefer matching by link (most reliable), then by name
+        chapter = Chapter.find_by(link: link, novel: novel) if link.present?
+        chapter ||= Chapter.find_by(name: title, novel: novel)
+
+        if chapter
+          # Update name/link if they changed
+          updates = {}
+          updates[:name] = title if chapter.name != title
+          updates[:link] = link if link.present? && chapter.link != link
+          chapter.update_columns(updates) if updates.any?
+
+          # Update position if different or nil
+          if chapter.position != pos
+            chapter.update_columns(position: pos)
+          end
+        else
+          # Create missing chapter with correct position
+          Chapter.create!(
+            name: title,
+            link: link,
+            novel: novel,
+            position: pos
+          )
+        end
+      end
+
+      # After syncing, ensure any remaining chapters (not present in source_list)
+      # that have nil positions get assigned a sequential position after the last one.
+      max_pos = novel.chapters.maximum(:position) || source_list.length
+      novel.chapters.where(position: nil).find_each do |ch|
+        max_pos += 1
+        ch.update_columns(position: max_pos)
+      end
+    end
+  rescue => e
+    Rails.logger.error "sync_positions_from_source failed for novel #{novel&.id}: #{e.message}"
+  end
+
+  # Heuristics to determine whether scraped list is newest-first
+  def looks_newest_first?(list)
+    return false unless list.is_a?(Array) && list.size >= 2
+
+    first_num = extract_chapter_number(list.first[:title])
+    last_num  = extract_chapter_number(list.last[:title])
+
+    return false unless first_num && last_num
+    first_num > last_num
+  end
+
+  # Try to pull a numeric chapter index from the title (e.g. "Chapter 123", "Ch. 12.5")
+  def extract_chapter_number(title)
+    return nil unless title
+    m = title.match(/chapter\s*([0-9]+(\.[0-9]+)?)/i) || title.match(/ch(?:\.)?\s*([0-9]+(\.[0-9]+)?)/i)
+    m && m[1].to_f
+  end
+
+  def create_chapters(novel)
+    # Keep compatibility: if we have raw @chapter_data, sync positions from that list
+    sync_positions_from_source(novel, @chapter_data) if novel && @chapter_data.any?
   end
 
   def cleanup_browser

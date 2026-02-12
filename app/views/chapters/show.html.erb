@@ -2,6 +2,16 @@
 
 <%= render @chapter %>
 
+<nav class="chapter-navigation">
+  <% if @previous_chapter %>
+    <%= link_to "← Previous", @previous_chapter %>
+  <% end %>
+
+  <% if @next_chapter %>
+    <%= link_to "Next →", @next_chapter %>
+  <% end %>
+</nav>
+
 <div>
   <%= link_to "Back To Chapters", @chapter.novel %>
 </div>

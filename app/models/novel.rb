@@ -1,6 +1,5 @@
 class Novel < ApplicationRecord
   belongs_to :website
-  belongs_to :source, optional: true
-  has_many :chapters, dependent: :destroy
+  has_many :chapters, -> { order(position: :asc, created_at: :asc) }, dependent: :destroy
   validates :name, uniqueness: { scope: :website_id }
 end
