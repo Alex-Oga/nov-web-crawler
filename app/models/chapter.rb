@@ -4,13 +4,17 @@ class Chapter < ApplicationRecord
 
   scope :ordered, -> { order(position: :asc, created_at: :asc) }
 
-  def next_chapter
-    return nil unless position
-    novel.chapters.where("position > ?", position).order(position: :asc).first
+  def previous_chapter
+    chs = novel.chapters.order(position: :asc, created_at: :asc).to_a
+    idx = chs.index(self)
+    return nil unless idx
+    chs[idx + 1]
   end
 
-  def previous_chapter
-    return nil unless position
-    novel.chapters.where("position < ?", position).order(position: :desc).first
+  def next_chapter
+    chs = novel.chapters.order(position: :asc, created_at: :asc).to_a
+    idx = chs.index(self)
+    return nil unless idx && idx > 0
+    chs[idx - 1]
   end
 end
