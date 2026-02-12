@@ -2,6 +2,11 @@
 
 <%= render @novel %>
 
+<% if @novel.image_url.present? %>
+  <%= image_tag @novel.image_url, alt: @novel.name, loading: "lazy" %>
+<% end %>
+<br>
+
 <div>
   <%= link_to "New Chapter", new_novel_chapter_path(@novel) if current_user&.admin? %>
 </div>

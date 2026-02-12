@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_12_085754) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_12_142051) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -67,7 +67,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_12_085754) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
+    t.string "image_url"
+    t.text "description"
+    t.index ["image_url"], name: "index_novels_on_image_url"
     t.index ["website_id"], name: "index_novels_on_website_id"
+  end
+
+  create_table "novels_tags", id: false, force: :cascade do |t|
+    t.integer "novel_id", null: false
+    t.integer "tag_id", null: false
+    t.index ["novel_id", "tag_id"], name: "index_novels_tags_on_novel_id_and_tag_id", unique: true
+    t.index ["tag_id"], name: "index_novels_tags_on_tag_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -82,6 +92,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_12_085754) do
     t.index ["session_token"], name: "index_sessions_on_session_token", unique: true
     t.index ["user_id", "expires_at"], name: "index_sessions_on_user_id_and_expires_at"
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
   create_table "users", force: :cascade do |t|

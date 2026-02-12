@@ -39,6 +39,17 @@ class NovelsController < ApplicationController
         redirect_to @novel, notice: "Batch scrape completed for this novel."
     end
 
+    def search
+        if params[:tags].present?
+            # If you want novels that have all tags:
+            @novels = Novel.with_all_tags(params[:tags])
+            # Or to match any tag, use:
+            # @novels = Novel.with_any_tags(params[:tags])
+        else
+            @novels = Novel.all
+        end
+    end
+
     private
 
     def set_novel
