@@ -11,10 +11,11 @@ class ChapterScraperService
   end
 
   def scrape_content
-    setup_browser
 
     return parse_existing_content if @chapter.content.present?
     return ["No link provided"] unless @chapter.link.present?
+
+    setup_browser
 
     content = try_simple_fetch(@chapter)
     if content.empty? || content.include?("No content found")
@@ -50,7 +51,7 @@ class ChapterScraperService
         'disable-extensions': nil
       }
     )
-    Rails.logger.info "Browser initialized for batch scraping"
+    Rails.logger.info "Browser initialized for content scraping"
   end
 
   def try_simple_fetch(chapter)
