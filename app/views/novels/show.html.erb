@@ -1,39 +1,146 @@
-<p style="color: green"><%= notice %></p>
+<style>
+:root {
+  --bg: #0f1115;
+  --panel: #151922;
+  --text: #e6e6e6;
+  --muted: #9aa0a6;
+  --accent: #7aa2ff;
+  --border: #24293a;
+  --highlight: #1f2537;
+  --radius: 12px;
+}
 
-<%= render @novel %>
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-<% if @novel.image_url.present? %>
-  <%= image_tag @novel.image_url, alt: @novel.name, loading: "lazy" %>
-<% end %>
-<br>
+body { background: var(--bg); color: var(--text); font-family: Georgia, serif; }
 
-<div>
-  <%= link_to "New Chapter", new_novel_chapter_path(@novel) if current_user&.admin? %>
-</div>
-<br>
+header { background: var(--panel); padding: 1rem 2rem; border-bottom: 1px solid var(--border); }
+.logo { font-size: 1.5rem; font-weight: bold; }
+.logo a { color: inherit; text-decoration: none; }
 
-<% if authenticated? %>
-<% empty_chapters_count = @novel.chapters.where(content: [nil, '']).count %>
-  <small style="color: #666; margin-left: 10px;">
-    <%= empty_chapters_count %> Chapters Are Empty
-  </small>
-  <%= button_to "Batch Scrape Chapters", batch_scrape_novel_path(@novel), method: :post, data: { turbo_confirm: "Scrape all chapters for this novel?" } %>
-<% end %>
-<br>
+/* LAYOUT */
+main { max-width: 1000px; margin: auto; padding: 2rem 1.5rem 4rem; }
 
-<% @chapters.each do |chapter| %>
-    <div>
-    <%= link_to chapter.name, chapter %>
+/* NOVEL CARD */
+.novel-card {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 2rem;
+  background: var(--panel);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.cover img { width: 100%; border-radius: var(--radius); display: block; }
+
+.novel-info h1 { font-size: 2rem; margin-bottom: 0.3rem; }
+.author { color: var(--muted); margin-bottom: 1rem; }
+
+.meta { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+.tag { background: var(--highlight); border: 1px solid var(--border); padding: 0.3rem 0.7rem; border-radius: var(--radius); font-size: 0.85rem; color: var(--text); }
+
+/* DESCRIPTION */
+.description { background: var(--highlight); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border); line-height: 1.7; margin-top: 1rem; }
+
+/* CHAPTERS */
+.chapters { margin-top: 2.5rem; }
+.chapters h2 { margin-bottom: 1rem; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.table th, .table td { padding: 0.9rem; text-align: left; border-bottom: 1px solid var(--border); }
+.table th { background: var(--highlight); color: var(--muted); font-weight: normal; }
+.table tr:hover { background: var(--highlight); }
+a.chapter-link { color: var(--accent); text-decoration: none; }
+a.chapter-link:hover { text-decoration: underline; }
+
+@media (max-width: 700px) {
+  .novel-card { grid-template-columns: 1fr; }
+  .cover { max-width: 220px; margin: 0 auto; }
+  .novel-info { text-align: left; }
+}
+</style>
+
+<main>
+  <% if notice.present? %>
+    <p style="color:#bff0b3; margin-bottom:12px;"><%= notice %></p>
+  <% end %>
+
+  <section class="novel-card">
+    <div class="cover">
+      <% if @novel.image_url.present? %>
+        <%= image_tag @novel.image_url, alt: @novel.name %>
+      <% else %>
+        <%= image_tag "https://via.placeholder.com/400x600?text=Cover", alt: "Cover" %>
+      <% end %>
     </div>
-<% end %>
-<br>
 
-<div>
-  <%= link_to "Back To #{@novel.website.name} Novels", @novel.website %>
-</div>
+    <div class="novel-info">
+      <h1><%= @novel.name %></h1>
 
-<% if current_user&.admin? %>
-  <%= link_to "Edit This Novel", edit_novel_path(@novel) %> 
-  <br>
-  <%= button_to "Delete", @novel, method: :delete, data: { turbo_confirm: "Are you sure?" } %>
-<% end %>
+      <% if @novel.respond_to?(:author) && @novel.author.present? %>
+        <div class="author">by <%= @novel.author %></div>
+      <% end %>
+
+      <% if @novel.tags.any? %>
+        <div class="meta">
+          <% @novel.tags.each do |tag| %>
+            <div class="tag"><%= tag.name %></div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% if @novel.description.present? %>
+        <div class="description"><%= simple_format(@novel.description) %></div>
+      <% end %>
+
+      <div style="margin-top:12px;">
+        <%= link_to "Back To #{@novel.website.name} Novels", @novel.website, style: "color:var(--accent); text-decoration:none; margin-right:12px;" %>
+
+        <% if current_user&.admin? %>
+          <%= link_to "New Chapter", new_novel_chapter_path(@novel), style: "color:var(--accent); text-decoration:none; margin-right:12px;" %>
+          <%= link_to "Edit This Novel", edit_novel_path(@novel), style: "color:var(--accent); text-decoration:none; margin-right:12px;" %>
+          <%= button_to "Delete Novel", @novel, method: :delete, data: { turbo_confirm: "Are you sure?" }, form: { style: "display:inline" }, style: "background:#7a1e1e; color:#fff; border:none; padding:6px 10px; border-radius:6px;" %>
+        <% end %>
+      </div>
+
+      <% if authenticated? %>
+        <% empty_chapters_count = @novel.chapters.where(content: [nil, '']).count %>
+        <div style="margin-top:12px; color:var(--muted);">
+          <%= empty_chapters_count %> Chapters Are Empty
+        </div>
+        <div style="margin-top:8px;">
+          <%= button_to "Batch Scrape Chapters", batch_scrape_novel_path(@novel), method: :post, data: { turbo_confirm: "Scrape all chapters for this novel?" } %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="chapters">
+    <h2>Chapters</h2>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @chapters.each_with_index do |chapter, i| %>
+          <tr>
+            <td><%= chapter.position || (i + 1) %></td>
+            <td><%= link_to chapter.name, chapter, class: "chapter-link" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+</main>
