@@ -1,6 +1,6 @@
 class NovelsController < ApplicationController
     allow_unauthenticated_access only: %i[ show ]
-    before_action :require_admin, only: %i[ new create edit update ]
+    #before_action :require_admin, only: %i[ new create edit update ]
     before_action :set_novel, only: [:show, :edit, :update, :batch_scrape]
     before_action :set_website, only: [:new, :create] 
 
@@ -30,6 +30,13 @@ class NovelsController < ApplicationController
         else
             render :edit, status: :unprocessable_entity
         end
+    end
+
+    def destroy
+        @novel = Novel.find(params[:id])
+        website = @novel.website
+        @novel.destroy
+        redirect_to website, notice: "Novel was successfully deleted."
     end
 
     def batch_scrape
