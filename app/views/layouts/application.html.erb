@@ -2,12 +2,28 @@
 <html>
   <!-- ... -->
   <body>
-    <div class="notice"><%= notice %></div>
-    <nav>
-      <%= link_to "Home", root_path %>
-      <%= link_to "Login", new_session_path unless authenticated? %>
-      <%= button_to "Log out", session_path, method: :delete if authenticated? %>
-    </nav>
+    <%# render a page-specific header if provided, otherwise show the default nav %>
+      <div class="notice"><%= notice %></div>
+
+      <% if content_for?(:header) %>
+        <%= yield :header %>
+      <% else %>
+        <header style="background:var(--panel,#151922); border-bottom:1px solid var(--border,#24293a);">
+          <div style="margin:0 auto; display:flex; align-items:center; justify-content:space-between;">
+            <div class="logo" style="font-size:1.3rem; font-weight:bold;">
+              <%= link_to "NightRead", root_path, style: "color:inherit; text-decoration:none;" %>
+            </div>
+
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+              <% if authenticated? %>
+                <%= button_to "Log out", session_path, method: :delete, form: { style: "margin:0;" }, style: "background:transparent; border:1px solid transparent; color:inherit; padding:0.45rem 0.75rem; border-radius:8px; cursor:pointer;" %>
+              <% else %>
+                <%= link_to "Login", new_session_path, style: "color:var(--accent,#7aa2ff); text-decoration:none; padding:0.45rem 0.75rem; border-radius:8px;" %>
+              <% end %>
+            </div>
+          </div>
+        </header>
+      <% end %>
 
     <main>
       <%= yield %>

@@ -1,80 +1,176 @@
-<h1><%= t ".title" %></h1>
+<style>
+:root {
+  --bg: #0f1115;
+  --panel: #151922;
+  --text: #e6e6e6;
+  --muted: #9aa0a6;
+  --accent: #7aa2ff;
+  --border: #24293a;
+  --highlight: #1f2537;
+  --radius: 12px;
+}
 
-<% if authenticated? %>
-  <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
-    <h3>NovelUpdates Series Finder</h3>
-      <%= form_with url: websites_path(@website), method: :get, local: true do |form| %>
-        <%= form.label :scrape_url, "NovelUpdates URL:" %>
-        <%= form.url_field :scrape_url, placeholder: "https://www.novelupdates.com/series/novel-name/", 
-                          style: "width: 400px; margin: 0 10px;", 
-                          value: params[:scrape_url] %>
-        <%= form.submit "Update Novel Library", style: "padding: 8px 16px;" %>
-      <% end %>
-      <% if @scrape_error %>
-          <div style="margin-top: 10px; padding: 10px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px;">
-            <strong>Error:</strong> <%= @scrape_error %>
-          </div>
-      <% end %>
-  </div>
-<% end %>
+* { box-sizing: border-box; }
 
-<% if current_user&.admin? %>
-  <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-    <h3>Refresh Novel Content</h3>
-    
-    <%= form_with url: scrape_content_websites_path, method: :post, local: true, style: "display: inline;" do |form| %>
-      <%= form.submit "Fill All Empty Chapters", 
-          style: "padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;",
-          confirm: "This will scrape content for all empty chapters. This may take a while. Continue?" %>
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 18px;
+  text-align: center;
+}
+
+header { background: var(--panel); padding: 1rem 2rem; border-bottom: 1px solid var(--border); }
+.logo { font-size: 1.5rem; font-weight: bold; }
+.logo a { color: inherit; text-decoration: none; }
+
+main { flex: 1; display: grid; place-items: start center; padding: 2rem; gap: 1rem; }
+
+.page {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.section + .section { margin-top: 1rem; }
+
+h1 { margin: 0 0 0.5rem 0; font-size: 1.8rem; }
+h3 { margin: 0 0 0.75rem 0; font-size: 1.2rem; }
+
+.subtitle { color: var(--muted); margin-bottom: 0.75rem; font-size: 1rem; }
+
+.form-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+.form-input { flex: 1 1 360px; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--highlight); color: var(--text); text-align: center; font-size: 1rem; }
+.form-input:focus { outline: none; border-color: var(--accent); }
+
+.btn { padding: 0.7rem 1rem; background: var(--accent); color: #000; border: none; border-radius: 8px; cursor:pointer; font-size: 1rem; }
+.btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn.warn { background: #28a745; color: #000; }
+
+.helper { color: var(--muted); font-size: 1rem; }
+
+.flash { margin-bottom: 1rem; padding: 0.8rem 0.9rem; border-radius: 8px; font-size: 1rem; }
+.flash.alert { background: #3a1e1e; color: #ffb3b3; }
+.flash.notice { background: #163a17; color: #bff0b3; }
+
+.table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; }
+.table th, .table td { border: 1px solid var(--border); padding: 10px; text-align: center; font-size: 1rem; }
+.table a { color: var(--accent); text-decoration: none; }
+.table a:hover { text-decoration: underline; }
+</style>
+
+<main>
+  <div class="page">
+    <h1><%= t ".title" %></h1>
+
+    <% if flash[:alert] %>
+      <div class="flash alert"><%= flash[:alert] %></div>
     <% end %>
-    
-    <% empty_chapters_count = Chapter.where(content: [nil, '']).count %>
-    <small style="color: #666; margin-left: 10px;">
-      <%= empty_chapters_count %> Chapters Are Empty
-    </small>
-  <% end %>
-</div>
+    <% if flash[:notice] %>
+      <div class="flash notice"><%= flash[:notice] %></div>
+    <% end %>
 
-<% if @chapter_data && @chapter_data.any? %>
-  <h3>Latest Chapters from NovelUpdates</h3>
-  <table style="width: 100%; border-collapse: collapse;">
-    <thead>
-      <tr>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Group</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Chapter</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @chapter_data.each do |data| %>
-        <tr>
-          <td style="border: 1px solid #ddd; padding: 8px;"><%= data[:group_name] %></td>
-          <td style="border: 1px solid #ddd; padding: 8px;">
-            <a href="<%= data[:chapter_url] %>" target="_blank"><%= data[:chapter_title] %></a>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-  <br>
-<% end %>
+    <% if authenticated? %>
+      <div class="section">
+        <h3>NovelUpdates Series Finder</h3>
+        <div class="subtitle">Paste a NovelUpdates series URL to add/update a novel in the library.</div>
 
-<% if @scrape_results %>
-  <div style="margin: 20px 0; padding: 20px; border: 1px solid #28a745; border-radius: 5px; background-color: #d4edda;">
-    <h3>Content Scraping Results</h3>
-    <p><strong>Scraped:</strong> <%= @scrape_results[:stats][:scraped] %> chapters</p>
-    <p><strong>Failed:</strong> <%= @scrape_results[:stats][:failed] %> chapters</p>
-  </div>
-<% end %>
+        <%= form_with url: websites_path(@website), method: :get, local: true do |form| %>
+          <div class="form-row">
+            <%= form.url_field :scrape_url,
+                  class: "form-input",
+                  placeholder: "https://www.novelupdates.com/series/novel-name/",
+                  value: params[:scrape_url] %>
+            <%= form.submit "Update Novel Library", class: "btn" %>
+          </div>
+        <% end %>
 
-<div>
-<%= link_to "New Website", new_website_path if current_user&.admin? %>
-</div>
-<br>
+        <% if @scrape_error %>
+          <div style="margin-top:12px;">
+            <div class="flash alert"><strong>Error:</strong> <%= @scrape_error %></div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
 
-<div id="websites">
-  <% @websites.each do |website| %>
-    <div>
-      <%= link_to website.name, website %>
+    <% if current_user&.admin? %>
+      <div class="section">
+        <h3>Refresh Novel Content</h3>
+        <div class="subtitle">Admin tools to scrape missing chapter content.</div>
+
+        <%= form_with url: scrape_content_websites_path, method: :post, local: true, html: { style: "display:inline" } do |form| %>
+          <%= form.submit "Fill All Empty Chapters",
+                class: "btn warn",
+                data: { confirm: "This will scrape content for all empty chapters. This may take a while. Continue?" } %>
+        <% end %>
+
+        <% empty_chapters_count = Chapter.where(content: [nil, '']).count %>
+        <div class="helper" style="margin-top:8px;">
+          <%= pluralize(empty_chapters_count, "Chapter") %> Are Empty
+        </div>
+      </div>
+    <% end %>
+
+    <% if @chapter_data && @chapter_data.any? %>
+      <div class="section">
+        <h3>Latest Chapters from NovelUpdates</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Group</th>
+              <th>Chapter</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @chapter_data.each do |data| %>
+              <tr>
+                <td><%= data[:group_name] %></td>
+                <td><a href="<%= data[:chapter_url] %>" target="_blank" rel="noopener"><%= data[:chapter_title] %></a></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+
+    <% if @scrape_results %>
+      <div class="section">
+        <h3>Content Scraping Results</h3>
+        <p><strong>Scraped:</strong> <%= @scrape_results[:stats][:scraped] %> chapters</p>
+        <p><strong>Failed:</strong> <%= @scrape_results[:stats][:failed] %> chapters</p>
+      </div>
+    <% end %>
+
+    <div style="margin-top: 0.75rem;">
+      <%= link_to "New Website", new_website_path, class: "btn ghost" if current_user&.admin? %>
     </div>
-  <% end %>
-</div>
+
+    <div class="section" style="margin-top:1rem;">
+      <h3>Explore Novels From Different Translation Groups</h3>
+      <% if @websites.any? %>
+        <div style="display:grid; gap:8px; justify-items:center;">
+          <% @websites.each do |website| %>
+            <div style="padding:12px; width:100%; max-width:600px; border:1px solid var(--border); border-radius:8px; background:transparent;">
+              <%= link_to website.name, website, style: "color:var(--text); text-decoration:none; font-size:1.05rem;" %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="helper">No websites found.</div>
+      <% end %>
+    </div>
+  </div>
+</main>
