@@ -1,23 +1,120 @@
-<p style="color: green"><%= notice %></p>
-<%= render @website %>
+<style>
+:root {
+  --bg: #0f1115;
+  --panel: #151922;
+  --text: #e6e6e6;
+  --muted: #9aa0a6;
+  --accent: #7aa2ff;
+  --border: #24293a;
+  --highlight: #1f2537;
+  --radius: 12px;
+}
 
+* { box-sizing: border-box; }
 
-<div>
-  <%= link_to "New Novel", new_website_novel_path(@website) if current_user&.admin? %>
-</div>
-<br>
+header { background: var(--panel); padding: 1rem 2rem; border-bottom: 1px solid var(--border); }
+.logo { font-size: 1.5rem; font-weight: bold; }
+.logo a { color: inherit; text-decoration: none; }
 
-<% @novels.each do |novel| %>
-    <div>
-    <%= link_to novel.name, novel %>
-    </div>
-<% end %>
-<br>
+body { margin: 0; background: var(--bg); color: var(--text); font-family: Georgia, serif; }
 
-<%= link_to "Back To Websites", websites_path %>
-<br>
-<% if current_user&.admin? %>
-<%= link_to "Edit This Website", edit_website_path(@website) %>
-<br>
-<%= button_to "Delete", @website, method: :delete, data: { turbo_confirm: "Are you sure?" } %>
-<% end %>
+/* NOVEL CARD */
+.novel-card {
+  display: grid;
+  justify-content: space-around;
+  
+  background: var(--panel);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+/* LAYOUT */
+main { max-width: 1200px; margin: auto; padding: 2rem 1.5rem 4rem; }
+
+/* PAGE TITLE */
+.page-title { font-size: 2rem; margin-bottom: 1.5rem; text-align: left; color: var(--text); }
+
+/* GRID */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.5rem; }
+
+/* CARD */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display:block;
+  color:inherit;
+  text-decoration:none;
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+.card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; }
+.card-body { padding: 0.8rem; text-align:left; }
+
+.title { font-size: 1rem; margin-bottom: 0.2rem; color:var(--text); }
+.author { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
+.tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.tag {
+  background: var(--highlight);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius);
+  font-size: 0.7rem;
+  color: var(--text);
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .page-title { font-size: 1.6rem; }
+}
+</style>
+
+<main>
+  <% if flash[:notice] %>
+    <p style="color: #bff0b3; margin-bottom: 8px;"><%= flash[:notice] %></p>
+  <% end %>
+
+  <section class="novel-card">
+  <h1 class="page-title"><%= @website.name.presence || t(".title", default: "Library") %> Novel Library</h1>
+
+  <br>
+  <div style="margin-bottom: 12px;">
+    <%= link_to "Back To Websites", websites_path, style: "color:var(--accent); text-decoration:none; margin-right:12px;" %>
+
+    <% if current_user&.admin? %>
+      <%= link_to "New Novel", new_website_novel_path(@website), style: "color:var(--accent); text-decoration:none; margin-right:12px;" %> 
+      <%= link_to "Edit Website", edit_website_path(@website), style: "color:var(--accent); text-decoration:none; margin-right:12px;" %>
+      <%= button_to "Delete Website", @website, method: :delete, data: { turbo_confirm: "Are you sure?" }, form: { style: "display:inline" }, style: "background:#7a1e1e; color:#fff; border:none; padding:6px 10px; border-radius:6px;" %>
+    <% end %>
+  </div>
+  </section>
+
+  <div class="grid">
+    <% @novels.each do |novel| %>
+      <%= link_to novel_path(novel), class: "card" do %>
+        <% if novel.image_url.present? %>
+          <%= image_tag novel.image_url, alt: novel.name %>
+        <% else %>
+          <%= image_tag "https://via.placeholder.com/300x450?text=Cover", alt: "Cover" %>
+        <% end %>
+
+        <div class="card-body">
+          <div class="title"><%= novel.name %></div>
+          <% if novel.respond_to?(:author) && novel.author.present? %>
+            <div class="author"><%= novel.author %></div>
+          <% end %>
+
+          <% if novel.tags.any? %>
+            <div class="tags">
+              <% novel.tags.each do |tag| %>
+                <div class="tag"><%= tag.name %></div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</main>
