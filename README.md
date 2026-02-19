@@ -1,34 +1,48 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-# nov-web-crawler
-=======
-=======
->>>>>>> fb4afc30bcf76b5f631e286d3941ba9da558bf9d
-# README
+# Nov — Web crawler & reader
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A small Rails app for scraping and reading translated web novels.
 
-Things you may want to cover:
+Quick links
+- Code: [app/](app/)
+- Scraper services: [app/services/novel_updates_scraper_service.rb](app/services/novel_updates_scraper_service.rb), [app/services/chapter_scraper_service.rb](app/services/chapter_scraper_service.rb), [app/services/batch_chapter_scraper_service.rb](app/services/batch_chapter_scraper_service.rb)
+- Routes (web UI / scraping endpoints): [config/routes.rb](config/routes.rb)
+- Setup script: [bin/setup](bin/setup)
+- Docker entrypoint / image: [bin/docker-entrypoint](bin/docker-entrypoint), [Dockerfile](Dockerfile)
+- Gemfile: [Gemfile](Gemfile)
+- Schema reference: [db/schema.rb](db/schema.rb)
 
-* Ruby version
+Prerequisites
+- Ruby: see [.ruby-version](.ruby-version)
+- Bundler, Node/Yarn (if editing frontend assets), SQLite3 (dev) or your chosen DB
+- Optional: headless browser dependencies for scrapers (Ferrum / Watir / webdrivers)
 
-* System dependencies
+Local setup (development)
+1. Install gems:
+   bundle install
+3. Run the project setup (creates, migrates DB, seeds if any):
+   bin/setup
+4. Start the server:
+   bin/rails server
+6. Run tests:
+   bin/rails test
 
-* Configuration
+Environment
+- Put local env vars in `.env` (loaded by [dotenv-rails](Gemfile)).
+- Scraper credentials (optional) used by [app/services/novel_updates_scraper_service.rb](app/services/novel_updates_scraper_service.rb):
+  - SCRAPE_USERNAME
+  - SCRAPE_PASSWORD
+- For production Docker usage set RAILS_MASTER_KEY and production env vars.
 
-* Database creation
+Using the scrapers
+- Add/import websites/novels via the web UI (see [config/routes.rb](config/routes.rb)).
+- Batch chapter scraping is available from the novel show page (POST to member `batch_scrape`) and the site exposes a collection `scrape_content` endpoint for websites.
 
-* Database initialization
+Deploy
+- Container build: see [Dockerfile](Dockerfile).
+- If using Kamal, see `.kamal/` hooks and `bin/kamal` for deployment helpers.
 
-* How to run the test suite
+Contributing / Notes
+- Keep scraper browser options and timeouts under test when running at scale (see Ferrum usage in [app/services/chapter_scraper_service.rb](app/services/chapter_scraper_service.rb)).
+- Report issues or add README improvements via PR.
 
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-<<<<<<< HEAD
->>>>>>> fb4afc3 (Instance creation - Cleanslate)
-=======
->>>>>>> fb4afc30bcf76b5f631e286d3941ba9da558bf9d
+Files referenced above can be opened directly in this workspace.
