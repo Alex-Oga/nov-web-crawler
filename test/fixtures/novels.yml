@@ -2,8 +2,10 @@
 
 one:
   website: one
-  link: MyString
+  name: TestNovel1
+  link: https://novelupdates.com/series/test-novel-1/
 
 two:
   website: two
-  link: MyString
+  name: TestNovel2
+  link: https://novelupdates.com/series/test-novel-2/

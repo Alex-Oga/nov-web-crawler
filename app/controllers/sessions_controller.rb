@@ -8,7 +8,7 @@ class SessionsController < ApplicationController
   def create
     if user = User.authenticate_by(params.permit(:email_address, :password))
       session_record = start_new_session_for(user)
-      
+
       Rails.logger.info "New session created for user #{user.email_address} (Session ID: #{session_record.id})"
       redirect_to after_authentication_url
     else

@@ -41,11 +41,11 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 
 # For loading environment variables from .env file
-gem 'dotenv-rails'
+gem "dotenv-rails"
 
-gem 'watir'
+gem "watir"
 
-gem 'webdrivers'
+gem "webdrivers"
 
 gem "ferrum"
 
@@ -58,7 +58,6 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
-
 end
 
 group :development do
@@ -68,6 +67,6 @@ end
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem 'capybara'
+  gem "capybara"
   gem "selenium-webdriver"
 end

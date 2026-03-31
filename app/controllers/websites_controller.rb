@@ -1,15 +1,15 @@
-require 'nokogiri'
-require 'watir'
-require 'uri'
-require 'ferrum'
+require "nokogiri"
+require "watir"
+require "uri"
+require "ferrum"
 
 class WebsitesController < ApplicationController
     include AdminAuthorization
-    
+
     allow_unauthenticated_access only: %i[ index show ]
     before_action :require_admin, only: %i[ new create edit update destroy scrape_content ]
     before_action :set_website, only: %i[show edit update destroy]
-    
+
     def index
         @websites = Website.all
         @chapter_data = []
@@ -18,20 +18,20 @@ class WebsitesController < ApplicationController
 
         if params[:scrape_url].present?
             # Queue background job for async scraping
-            ScrapeNovelJob.perform_later(params[:scrape_url], scrape_content: params[:scrape_content] == '1')
+            ScrapeNovelJob.perform_later(params[:scrape_url], scrape_content: params[:scrape_content] == "1")
             @scrape_queued = true
             flash.now[:notice] = "Scraping job queued. Chapters will appear shortly."
         end
     end
-    
+
     def scrape_content
         @websites = Website.all
         @chapter_data = []
-        
+
         # Admin-only batch scraping
         scraper = BatchChapterScraperService.new
         @scrape_results = scraper.scrape_all_content
-        
+
         render :index
     end
 
@@ -46,7 +46,7 @@ class WebsitesController < ApplicationController
     def create
         @website = Website.new(website_params)
         if @website.save
-            redirect_to @website, notice: 'Website was successfully created.'
+            redirect_to @website, notice: "Website was successfully created."
         else
             render :new, status: :unprocessable_entity
         end
@@ -57,7 +57,7 @@ class WebsitesController < ApplicationController
 
     def update
         if @website.update(website_params)
-            redirect_to @website, notice: 'Website was successfully updated.'
+            redirect_to @website, notice: "Website was successfully updated."
         else
             render :edit, status: :unprocessable_entity
         end
@@ -65,7 +65,7 @@ class WebsitesController < ApplicationController
 
     def destroy
         @website.destroy
-        redirect_to websites_path, notice: 'Website was successfully destroyed.'
+        redirect_to websites_path, notice: "Website was successfully destroyed."
     end
 
     private

@@ -2,12 +2,14 @@
 
 one:
   novel: one
-  name: MyString
-  link: MyString
-  content: MyText
+  name: Chapter 1
+  link: https://example1.com/chapter-1
+  content: Test chapter content
+  position: 1
 
 two:
   novel: two
-  name: MyString
-  link: MyString
-  content: MyText
+  name: Chapter 2
+  link: https://example2.com/chapter-2
+  content: Test chapter content
+  position: 1

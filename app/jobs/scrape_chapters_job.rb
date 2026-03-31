@@ -19,9 +19,9 @@ class ScrapeChaptersJob < ApplicationJob
     end
 
     chapters = if chapter_ids.present?
-      novel.chapters.where(id: chapter_ids, content: [nil, ''])
+      novel.chapters.where(id: chapter_ids, content: [ nil, "" ])
     else
-      novel.chapters.where(content: [nil, ''])
+      novel.chapters.where(content: [ nil, "" ])
     end
 
     if chapters.empty?

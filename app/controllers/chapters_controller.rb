@@ -1,10 +1,10 @@
-require 'nokogiri'
-require 'open-uri'
+require "nokogiri"
+require "open-uri"
 
 class ChaptersController < ApplicationController
     allow_unauthenticated_access only: %i[ show ]
-    before_action :set_chapter, only: [:show, :edit, :update, :destroy]
-    before_action :set_novel, only: [:new, :create] 
+    before_action :set_chapter, only: [ :show, :edit, :update, :destroy ]
+    before_action :set_novel, only: [ :new, :create ]
 
     def show
         @content = ChapterScraperService.new(@chapter).scrape_content

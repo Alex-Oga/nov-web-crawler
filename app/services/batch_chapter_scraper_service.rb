@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-require 'nokogiri'
-require 'open-uri'
-require 'ferrum'
+require "nokogiri"
+require "open-uri"
+require "ferrum"
 
 class BatchChapterScraperService
   include ContentExtraction
   include RedirectResolver
 
   def initialize(chapters = nil)
-    @chapters = chapters || Chapter.where(content: [nil, ''])
+    @chapters = chapters || Chapter.where(content: [ nil, "" ])
     @browser = nil
     @stats = { scraped: 0, failed: 0, total: 0 }
   end
@@ -71,7 +71,7 @@ class BatchChapterScraperService
         content = try_simple_fetch(chapter)
       end
 
-      if content.any? && !content.include?('No content found')
+      if content.any? && !content.include?("No content found")
         chapter.update!(content: content.join("\n\n"))
         @stats[:scraped] += 1
         Rails.logger.info "Successfully scraped: #{chapter.name} (#{total_words(content)} words)"
@@ -100,7 +100,7 @@ class BatchChapterScraperService
     doc = Nokogiri::HTML(@browser.body)
     content = extract_main_content(doc)
 
-    if content.empty? || content.include?('No content found')
+    if content.empty? || content.include?("No content found")
       content = try_alternative_extraction(doc)
     end
 

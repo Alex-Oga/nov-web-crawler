@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'nokogiri'
-require 'open-uri'
-require 'ferrum'
+require "nokogiri"
+require "open-uri"
+require "ferrum"
 
 class ChapterScraperService
   include ContentExtraction
@@ -14,16 +14,16 @@ class ChapterScraperService
 
   def scrape_content
     return parse_existing_content if @chapter.content.present?
-    return ['No link provided'] unless @chapter.link.present?
+    return [ "No link provided" ] unless @chapter.link.present?
 
     setup_browser
     content = fetch_chapter_content(@chapter)
 
-    if content.any? && !content.include?('No content found')
+    if content.any? && !content.include?("No content found")
       @chapter.update!(content: content.join("\n\n"))
       content
     else
-      ['No content found']
+      [ "No content found" ]
     end
   ensure
     cleanup_browser
@@ -80,7 +80,7 @@ class ChapterScraperService
     doc = Nokogiri::HTML(@browser.body)
     content = extract_main_content(doc)
 
-    if content.empty? || content.include?('No content found')
+    if content.empty? || content.include?("No content found")
       content = try_alternative_extraction(doc)
     end
 

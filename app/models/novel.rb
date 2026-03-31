@@ -8,12 +8,12 @@ class Novel < ApplicationRecord
 
   # Return tags as comma separated list for forms
   def tag_list
-    tags.pluck(:name).join(', ')
+    tags.pluck(:name).join(", ")
   end
 
   # Accepts comma-separated or array
   def tag_list=(value)
-    names = Array(value).join(',').split(',').map { |n| n.to_s.strip.downcase }.reject(&:blank?).uniq
+    names = Array(value).join(",").split(",").map { |n| n.to_s.strip.downcase }.reject(&:blank?).uniq
     self.tags = names.map { |n| Tag.find_or_create_by!(name: n) }
   end
 
@@ -29,7 +29,7 @@ class Novel < ApplicationRecord
     return none if names.empty?
     joins(:tags)
       .where(tags: { name: names })
-      .group('novels.id')
-      .having('COUNT(DISTINCT tags.id) = ?', names.length)
+      .group("novels.id")
+      .having("COUNT(DISTINCT tags.id) = ?", names.length)
   }
 end

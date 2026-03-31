@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'nokogiri'
-require 'ferrum'
-require 'uri'
-require 'open-uri'
+require "nokogiri"
+require "ferrum"
+require "uri"
+require "open-uri"
 
 class NovelUpdatesScraperService
   include RedirectResolver
@@ -58,12 +58,12 @@ class NovelUpdatesScraperService
 
   def valid_novelupdates_url?
     return false unless @scrape_url.is_a?(String)
-    return false unless @scrape_url.start_with?('https://www.novelupdates.com/series/')
+    return false unless @scrape_url.start_with?("https://www.novelupdates.com/series/")
     begin
       uri = URI.parse(@scrape_url)
       return false unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
-      return false unless uri.host == 'www.novelupdates.com'
-      return false unless uri.path.start_with?('/series/')
+      return false unless uri.host == "www.novelupdates.com"
+      return false unless uri.path.start_with?("/series/")
       Rails.logger.info "Valid NovelUpdates URL: #{@scrape_url}"
       true
     rescue URI::InvalidURIError => e
@@ -79,14 +79,14 @@ class NovelUpdatesScraperService
 
   def login_to_site
     # If credentials are present, try to log in — otherwise skip.
-    return unless ENV['SCRAPE_USERNAME'].present? && ENV['SCRAPE_PASSWORD'].present?
+    return unless ENV["SCRAPE_USERNAME"].present? && ENV["SCRAPE_PASSWORD"].present?
 
     @browser.go_to("https://www.novelupdates.com/login/")
     sleep(0.5)
 
     begin
-      @browser.at_css('input[name="log"]').focus.type(ENV['SCRAPE_USERNAME'])
-      @browser.at_css('input[name="pwd"]').focus.type(ENV['SCRAPE_PASSWORD'])
+      @browser.at_css('input[name="log"]').focus.type(ENV["SCRAPE_USERNAME"])
+      @browser.at_css('input[name="pwd"]').focus.type(ENV["SCRAPE_PASSWORD"])
       @browser.at_css('input[type="submit"]').click
       sleep(1)
     rescue => e
@@ -115,7 +115,7 @@ class NovelUpdatesScraperService
     page_source = @browser.body
     doc = Nokogiri::HTML(page_source)
 
-    rows = doc.css('#myTable tbody tr')
+    rows = doc.css("#myTable tbody tr")
     if rows.empty?
       Rails.logger.warn "No chapter rows found on current page"
       return
@@ -129,12 +129,12 @@ class NovelUpdatesScraperService
   end
 
   def extract_chapter_from_row(row)
-    cells = row.css('td')
+    cells = row.css("td")
     return unless cells.length >= 3
 
-    group_link = cells[1].at_css('a')
-    group_name = group_link&.text&.strip || 'Unknown'
-    group_url = group_link&.[]('href')
+    group_link = cells[1].at_css("a")
+    group_name = group_link&.text&.strip || "Unknown"
+    group_url = group_link&.[]("href")
 
     if @target_group.nil?
       @target_group = group_name
@@ -144,15 +144,15 @@ class NovelUpdatesScraperService
 
     return unless group_name == @target_group
 
-    chapter_link = cells[2].at_css('a')
+    chapter_link = cells[2].at_css("a")
     return unless chapter_link
 
     chapter_title = chapter_link.text.strip
-    chapter_url = chapter_link['href']
+    chapter_url = chapter_link["href"]
 
-    if chapter_url.start_with?('//')
+    if chapter_url.start_with?("//")
       chapter_url = "https:#{chapter_url}"
-    elsif chapter_url.start_with?('/')
+    elsif chapter_url.start_with?("/")
       chapter_url = "https://www.novelupdates.com#{chapter_url}"
     end
 
@@ -166,10 +166,10 @@ class NovelUpdatesScraperService
 
   def navigate_to_next_page
     doc = Nokogiri::HTML(@browser.body)
-    next_page_link = doc.at_css('a.next_page')
-    return false unless next_page_link&.[]('href')
+    next_page_link = doc.at_css("a.next_page")
+    return false unless next_page_link&.[]("href")
 
-    next_url = build_absolute_url(next_page_link['href'])
+    next_url = build_absolute_url(next_page_link["href"])
     @browser.go_to(next_url)
     apply_rate_limit
 
@@ -201,9 +201,9 @@ class NovelUpdatesScraperService
   end
 
   def build_absolute_url(url)
-    if url.start_with?('./')
+    if url.start_with?("./")
       URI.join(@scrape_url, url).to_s
-    elsif !url.start_with?('http')
+    elsif !url.start_with?("http")
       "https://www.novelupdates.com#{url}"
     else
       url
@@ -223,21 +223,21 @@ class NovelUpdatesScraperService
       doc = Nokogiri::HTML(@browser.body)
 
       # Prefer .seriesimg > img
-      img_el = doc.at_css('.seriesimg img') || doc.at_css('.seriesthumb img') || doc.at_css('meta[property="og:image"]')
+      img_el = doc.at_css(".seriesimg img") || doc.at_css(".seriesthumb img") || doc.at_css('meta[property="og:image"]')
       url = nil
       if img_el
-        url = img_el['src'] || img_el['data-src'] || img_el['data-original'] || img_el['data-lazy'] || img_el['content']
-        if url.blank? && img_el['srcset'].present?
-          url = img_el['srcset'].split(',').first.split.first
+        url = img_el["src"] || img_el["data-src"] || img_el["data-original"] || img_el["data-lazy"] || img_el["content"]
+        if url.blank? && img_el["srcset"].present?
+          url = img_el["srcset"].split(",").first.split.first
         end
       end
       @novel_image_url = absolute_url(url.to_s.strip) if url.present?
 
-      @novel_genres = doc.css('#seriesgenre a.genre').map { |a| a.text.to_s.strip }.reject(&:blank?)
+      @novel_genres = doc.css("#seriesgenre a.genre").map { |a| a.text.to_s.strip }.reject(&:blank?)
 
-      desc_el = doc.at_css('#editdescription') || doc.at_css('#seriesinfo #editdescription')
+      desc_el = doc.at_css("#editdescription") || doc.at_css("#seriesinfo #editdescription")
       if desc_el
-        paras = desc_el.css('p').map { |p| p.text.to_s.strip }.reject(&:blank?)
+        paras = desc_el.css("p").map { |p| p.text.to_s.strip }.reject(&:blank?)
         @novel_description = paras.join("\n\n") if paras.any?
       end
 
@@ -249,7 +249,7 @@ class NovelUpdatesScraperService
 
   def absolute_url(href)
     return href if href =~ /\Ahttp/i
-    if href.start_with?('//')
+    if href.start_with?("//")
       "https:#{href}"
     else
       URI.join(@scrape_url, href).to_s
@@ -305,7 +305,7 @@ class NovelUpdatesScraperService
   def extract_novel_name_from_url
     match = @scrape_url.match(%r{/series/([^/?]+)})
     if match
-      match[1].gsub('-', ' ').titleize
+      match[1].gsub("-", " ").titleize
     else
       nil
     end
@@ -322,7 +322,7 @@ class NovelUpdatesScraperService
 
       if @novel_genres.any?
         if novel.respond_to?(:tag_list=)
-          novel.tag_list = @novel_genres.join(', ')
+          novel.tag_list = @novel_genres.join(", ")
           novel.save! if novel.changed?
         elsif defined?(Tag) && novel.respond_to?(:tags=)
           tag_records = @novel_genres.map { |n| Tag.find_or_create_by!(name: n.downcase.strip) }

@@ -1,23 +1,23 @@
 Rails.application.routes.draw do
   resource :session
-  resources :users, only: [:new, :create]
+  resources :users, only: [ :new, :create ]
   resources :passwords, param: :token
   resources :websites do
     collection do
       post :scrape_content
     end
-    
-    resources :novels, except: [:index], shallow: true do
+
+    resources :novels, except: [ :index ], shallow: true do
       member do
         post :batch_scrape
       end
-      resources :chapters, except: [:index], shallow: true
+      resources :chapters, except: [ :index ], shallow: true
     end
   end
 
   root "websites#index"
 
-  get 'novels/search', to: 'novels#search', as: :novel_search
+  get "novels/search", to: "novels#search", as: :novel_search
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -31,5 +31,4 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
-
 end

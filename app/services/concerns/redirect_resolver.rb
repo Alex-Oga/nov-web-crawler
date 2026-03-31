@@ -7,13 +7,13 @@ module RedirectResolver
 
   # Cloudflare challenge indicators in page content
   CLOUDFLARE_INDICATORS = [
-    'Checking your browser',
-    'cf-browser-verification',
-    'cf_captcha_kind',
-    'Cloudflare Ray ID',
-    'DDoS protection by Cloudflare',
-    'challenge-running',
-    'cf-turnstile'
+    "Checking your browser",
+    "cf-browser-verification",
+    "cf_captcha_kind",
+    "Cloudflare Ray ID",
+    "DDoS protection by Cloudflare",
+    "challenge-running",
+    "cf-turnstile"
   ].freeze
 
   # Resolve a NovelUpdates redirect URL to the final destination URL.
@@ -42,8 +42,8 @@ module RedirectResolver
   # Check if URL is a NovelUpdates redirect link
   def novelupdates_redirect?(url)
     return false unless url.is_a?(String)
-    url.include?('novelupdates.com/extnu/') ||
-      url.include?('novelupdates.com/nu_go/')
+    url.include?("novelupdates.com/extnu/") ||
+      url.include?("novelupdates.com/nu_go/")
   end
 
   # Wait for redirect to complete (URL changes from novelupdates.com)
@@ -52,7 +52,7 @@ module RedirectResolver
 
     while attempts < max_attempts
       current_url = browser.current_url
-      break unless current_url.include?('novelupdates.com')
+      break unless current_url.include?("novelupdates.com")
 
       # Check for Cloudflare challenge
       if cloudflare_challenge_detected?(browser.body)

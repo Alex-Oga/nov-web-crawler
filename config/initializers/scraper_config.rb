@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Load scraper configuration from config/scraper.yml
-scraper_config_path = Rails.root.join('config', 'scraper.yml')
+scraper_config_path = Rails.root.join("config", "scraper.yml")
 
 if File.exist?(scraper_config_path)
   scraper_config = YAML.load_file(scraper_config_path, aliases: true)[Rails.env]

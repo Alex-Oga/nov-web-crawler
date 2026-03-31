@@ -10,11 +10,11 @@ module ContentExtraction
 
   # Common CSS selectors for chapter content containers
   CONTENT_SELECTORS = [
-    '.chapter-content', '.story-content', '.post-content',
-    '.entry-content', '.main-content', '.chapter-text',
-    '#content', '#chapter', '.chapter', '.story',
-    '.text-content', '.novel-content', '.reading-content',
-    '.reader-content', '.txt', '.content-area'
+    ".chapter-content", ".story-content", ".post-content",
+    ".entry-content", ".main-content", ".chapter-text",
+    "#content", "#chapter", ".chapter", ".story",
+    ".text-content", ".novel-content", ".reading-content",
+    ".reader-content", ".txt", ".content-area"
   ].freeze
 
   # Extract main content from a parsed document by grouping paragraphs
@@ -22,7 +22,7 @@ module ContentExtraction
   def extract_main_content(doc)
     content_by_class = {}
 
-    doc.css('p').each do |p|
+    doc.css("p").each do |p|
       text = p.text.strip
       next if text.empty? || text.length < 20
 
@@ -32,13 +32,13 @@ module ContentExtraction
     end
 
     largest_class = content_by_class.max_by do |_class_name, paragraphs|
-      paragraphs.join(' ').length
+      paragraphs.join(" ").length
     end
 
     if largest_class && largest_class[1].length > 2
       largest_class[1]
     else
-      ['No content found']
+      [ "No content found" ]
     end
   end
 
@@ -62,15 +62,15 @@ module ContentExtraction
       return text_blocks if text_blocks.any?
     end
 
-    ['No content found with alternative methods']
+    [ "No content found with alternative methods" ]
   end
 
   # Build CSS class path from element ancestors for content grouping
   def build_parent_path(element)
-    path_parts = element.ancestors.map { |a| a['class'] }.compact
-    path_parts << element.parent['class'] if element.parent&.[]('class')
+    path_parts = element.ancestors.map { |a| a["class"] }.compact
+    path_parts << element.parent["class"] if element.parent&.[]("class")
 
-    path_parts.any? ? path_parts.join(' > ') : 'no-class'
+    path_parts.any? ? path_parts.join(" > ") : "no-class"
   end
 
   # Wait for dynamic content to load by polling for paragraph elements
@@ -89,14 +89,14 @@ module ContentExtraction
   # Check if page likely has loaded content (3+ paragraphs with >50 chars)
   def content_likely_loaded?(html)
     doc = Nokogiri::HTML(html)
-    paragraphs = doc.css('p').select { |p| p.text.strip.length > 50 }
+    paragraphs = doc.css("p").select { |p| p.text.strip.length > 50 }
     paragraphs.length > 3
   end
 
   # Count total words in content array
   def total_words(content_array)
     return 0 unless content_array.is_a?(Array)
-    content_array.join(' ').split.size
+    content_array.join(" ").split.size
   end
 
   # Check if extracted content meets minimum word threshold

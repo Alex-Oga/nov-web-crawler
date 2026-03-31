@@ -10,6 +10,6 @@ class AddPositionToChapters < ActiveRecord::Migration[8.0]
       end
     end
 
-    add_index :chapters, [:novel_id, :position]
+    add_index :chapters, [ :novel_id, :position ]
   end
 end

@@ -1,8 +1,8 @@
 class NovelsController < ApplicationController
     allow_unauthenticated_access only: %i[ show ]
-    #before_action :require_admin, only: %i[ new create edit update ]
-    before_action :set_novel, only: [:show, :edit, :update, :batch_scrape]
-    before_action :set_website, only: [:new, :create] 
+    # before_action :require_admin, only: %i[ new create edit update ]
+    before_action :set_novel, only: [ :show, :edit, :update, :batch_scrape ]
+    before_action :set_website, only: [ :new, :create ]
 
     def show
         @chapters = @novel.chapters
@@ -23,7 +23,7 @@ class NovelsController < ApplicationController
 
     def edit
     end
-    
+
     def update
         if @novel.update(novel_params)
             redirect_to @novel, notice: "Novel was successfully updated."
@@ -49,8 +49,8 @@ class NovelsController < ApplicationController
         if params[:tags].present?
             # If you want novels that have all tags:
             @novels = Novel.with_all_tags(params[:tags])
-            # Or to match any tag, use:
-            # @novels = Novel.with_any_tags(params[:tags])
+        # Or to match any tag, use:
+        # @novels = Novel.with_any_tags(params[:tags])
         else
             @novels = Novel.all
         end
@@ -69,5 +69,4 @@ class NovelsController < ApplicationController
     def novel_params
         params.expect(novel: [ :name, :link ])
     end
-
 end
