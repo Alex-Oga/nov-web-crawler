@@ -1,0 +1,38 @@
+# Scraper configuration settings
+# Controls rate limiting, timeouts, and batch processing
+
+default: &default
+  # Seconds to wait between HTTP requests (rate limiting)
+  request_delay: 2
+
+  # Seconds to wait for manual Cloudflare CAPTCHA resolution
+  cloudflare_timeout: 120
+
+  # Maximum retry attempts for failed requests
+  max_retries: 3
+
+  # Number of chapters to process in each batch
+  batch_size: 10
+
+  # Seconds to wait for page content to load
+  content_load_timeout: 5
+
+  # Maximum concurrent browser instances
+  max_browsers: 1
+
+development:
+  <<: *default
+  request_delay: 1
+  cloudflare_timeout: 180
+
+test:
+  <<: *default
+  request_delay: 0
+  cloudflare_timeout: 5
+  max_retries: 1
+
+production:
+  <<: *default
+  request_delay: 3
+  cloudflare_timeout: 120
+  max_retries: 5

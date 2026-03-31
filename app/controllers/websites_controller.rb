@@ -14,15 +14,14 @@ class WebsitesController < ApplicationController
         @websites = Website.all
         @chapter_data = []
         @scrape_error = nil
+        @scrape_queued = false
 
         if params[:scrape_url].present?
-        scraper = NovelUpdatesScraperService.new(params[:scrape_url])
-        @chapter_data = scraper.scrape_chapters
-        
-        if @chapter_data.empty?
-            @scrape_error = "Invalid URL or scraping failed. Please use a NovelUpdates series URL."
+            # Queue background job for async scraping
+            ScrapeNovelJob.perform_later(params[:scrape_url], scrape_content: params[:scrape_content] == '1')
+            @scrape_queued = true
+            flash.now[:notice] = "Scraping job queued. Chapters will appear shortly."
         end
-    end
     end
     
     def scrape_content

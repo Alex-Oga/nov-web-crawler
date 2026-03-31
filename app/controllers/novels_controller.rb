@@ -40,10 +40,9 @@ class NovelsController < ApplicationController
     end
 
     def batch_scrape
-        chapters_to_scrape = @novel.chapters.where(content: [nil, ''])
-        scraper = BatchChapterScraperService.new(chapters_to_scrape)
-        @scrape_results = scraper.scrape_all_content
-        redirect_to @novel, notice: "Batch scrape completed for this novel."
+        # Queue background job for async scraping
+        ScrapeChaptersJob.perform_later(@novel.id)
+        redirect_to @novel, notice: "Batch scrape job queued. Content will be scraped in the background."
     end
 
     def search

@@ -1,9 +1,13 @@
+# frozen_string_literal: true
+
 require 'nokogiri'
 require 'ferrum'
 require 'uri'
 require 'open-uri'
 
 class NovelUpdatesScraperService
+  include RedirectResolver
+
   def initialize(scrape_url)
     @scrape_url = scrape_url
     @chapter_data = []
@@ -31,6 +35,9 @@ class NovelUpdatesScraperService
 
       # Navigate and collect chapters across pages
       navigate_and_scrape
+
+      # Resolve redirect URLs to final destinations
+      resolve_chapter_urls
 
       # After all chapters are found, extract metadata from the series page
       extract_metadata_from_series_page
@@ -87,10 +94,14 @@ class NovelUpdatesScraperService
     end
   end
 
-  # Keep the original navigation/collection logic intact
   def navigate_and_scrape
     @browser.go_to(@scrape_url)
-    sleep(1)
+    apply_rate_limit
+
+    # Check for Cloudflare on initial page load
+    if cloudflare_challenge_detected?(@browser.body)
+      handle_cloudflare_challenge(@browser)
+    end
 
     loop do
       scrape_current_page
@@ -148,7 +159,8 @@ class NovelUpdatesScraperService
     @chapter_data << {
       group_name: group_name,
       chapter_title: chapter_title,
-      chapter_url: chapter_url
+      chapter_url: chapter_url,
+      final_url: nil  # Will be resolved later
     }
   end
 
@@ -156,10 +168,36 @@ class NovelUpdatesScraperService
     doc = Nokogiri::HTML(@browser.body)
     next_page_link = doc.at_css('a.next_page')
     return false unless next_page_link&.[]('href')
+
     next_url = build_absolute_url(next_page_link['href'])
     @browser.go_to(next_url)
-    sleep(1)
+    apply_rate_limit
+
+    # Check for Cloudflare on pagination
+    if cloudflare_challenge_detected?(@browser.body)
+      handle_cloudflare_challenge(@browser)
+    end
+
     true
+  end
+
+  # Resolve NovelUpdates redirect URLs to final novel site URLs
+  def resolve_chapter_urls
+    Rails.logger.info "Resolving #{@chapter_data.length} redirect URLs..."
+
+    @chapter_data.each_with_index do |chapter, index|
+      redirect_url = chapter[:chapter_url]
+
+      if novelupdates_redirect?(redirect_url)
+        Rails.logger.debug "Resolving redirect #{index + 1}/#{@chapter_data.length}: #{redirect_url}"
+        chapter[:final_url] = resolve_final_url(redirect_url, @browser)
+        apply_rate_limit(custom_delay: 1)  # Shorter delay for redirects
+      else
+        chapter[:final_url] = redirect_url
+      end
+    end
+
+    Rails.logger.info "Finished resolving redirect URLs"
   end
 
   def build_absolute_url(url)
@@ -176,7 +214,12 @@ class NovelUpdatesScraperService
   def extract_metadata_from_series_page
     begin
       @browser.go_to(@scrape_url)
-      sleep(1)
+      apply_rate_limit
+
+      if cloudflare_challenge_detected?(@browser.body)
+        handle_cloudflare_challenge(@browser)
+      end
+
       doc = Nokogiri::HTML(@browser.body)
 
       # Prefer .seriesimg > img
@@ -224,7 +267,7 @@ class NovelUpdatesScraperService
     novel = find_or_create_novel(website)
 
     if novel
-      update_novel_metadata(novel)    # save image_url/description and attach image
+      update_novel_metadata(novel)
       sync_positions_from_source(novel, @chapter_data)
     else
       Rails.logger.error "Could not find or create novel for #{@scrape_url}"
@@ -268,13 +311,11 @@ class NovelUpdatesScraperService
     end
   end
 
-  # persist metadata (only save image URL and description, don't download/attach image)
   def update_novel_metadata(novel)
     begin
       novel.update!(description: @novel_description) if @novel_description.present?
 
       if @novel_image_url.present?
-        # Save the remote URL reference (best-effort)
         novel.update_columns(image_url: @novel_image_url)
         Rails.logger.info "Saved image_url for novel #{novel.id}: #{@novel_image_url}"
       end
@@ -294,11 +335,15 @@ class NovelUpdatesScraperService
   end
 
   # Reconcile and set chapter positions based on source order (oldest->newest)
+  # Now uses final_url instead of original redirect URL
   def sync_positions_from_source(novel, source_chapter_list)
     return unless novel && source_chapter_list.present?
 
     source_list = source_chapter_list.map do |cd|
-      { title: cd[:chapter_title].to_s.strip, link: cd[:chapter_url].to_s.strip }
+      {
+        title: cd[:chapter_title].to_s.strip,
+        link: (cd[:final_url] || cd[:chapter_url]).to_s.strip
+      }
     end
 
     source_list.reverse! if looks_newest_first?(source_list)
